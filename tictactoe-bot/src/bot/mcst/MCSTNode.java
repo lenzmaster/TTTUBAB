@@ -130,9 +130,9 @@ public class MCSTNode implements IReusable{
 			if (child == null){
 				if (evaluationValue == GlobalDefinitions.NODE_EVALUATION_LOWER_BOUND || 
 						evaluationValue == GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND){
-					LOGGER.log("Node with game ending state waws visited the " + visitCount + "time");
+					LOGGER.log("Node with game ending state was visited the " + visitCount + "time");
 				} else {
-					LOGGER.log("It was tried to select a child node although there were none");
+					LOGGER.log("It was tried to select a child node although there was none");
 				}
 			} else {
 				child.visitNode(this.gameState);

@@ -1,7 +1,5 @@
 package bot.actionvaluecalculation;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import bot.mcst.MCSTNode;
 
@@ -22,7 +20,7 @@ public class FirstActionValueCalculator implements IActionValueCalculator{
 			//reverse devision by old visit count
 			float cleanedActionValue = node.getActionValue() * (node.getVisitCount() -1);
 			//Substract old action value of child
-			cleanedActionValue = cleanedActionValue - (node.getOldActionValue() * (lastUpdatedChildNode.getVisitCount()-1));
+			cleanedActionValue = cleanedActionValue - (lastUpdatedChildNode.getOldActionValue() * (lastUpdatedChildNode.getVisitCount()-1));
 			//Add new action value of child and average again
 			newActionValue = (cleanedActionValue + lastUpdatedChildNode.getActionValue() * lastUpdatedChildNode.getVisitCount()) / node.getVisitCount();
 			

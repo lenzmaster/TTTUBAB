@@ -21,6 +21,11 @@ public class GlobalDefinitions {
 	public static final int PLAYER_NEUTRAL_ID = 0;
 	public static final int MACRO_FIELD_NEEDS_TO_BE_USED_ID = -1;
 	
+	//Prior probability constants
+	public static final float NODE_PRIOR_PROBABILITY_LOWER_BOUND = 0.0f;
+	public static final float NODE_PRIOR_PROBABILITY_UPPER_BOUND = 1.0f;
+	public static final float NODE_PRIOR_PROBABILITY_NEUTRAL_VALUE = 0.5f;
+	
 	//Node evaluation constants
 	public static final float NODE_EVALUATION_LOWER_BOUND = 0.0f;
 	public static final float NODE_EVALUATION_UPPER_BOUND = 1.0f;

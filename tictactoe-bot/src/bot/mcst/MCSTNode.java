@@ -3,6 +3,7 @@ package bot.mcst;
 import java.util.ArrayList;
 import java.util.List;
 
+import bot.Move;
 import bot.actionvaluecalculation.IActionValueCalculator;
 import bot.memory.IReusable;
 import bot.memory.ObjectManager;
@@ -26,6 +27,9 @@ public class MCSTNode implements IReusable{
 	private List<MCSTNode> childNodes = new ArrayList<MCSTNode>();
 	private float nodeSelectionValue = -1;
 	private int nodeLevel;
+	private MCSTNode winingChildNode;
+	private Boolean wasUpdated = false;
+	
 	
 	public IAction getTakenAction() {
 		return takenAction;
@@ -65,11 +69,15 @@ public class MCSTNode implements IReusable{
 	}
 	
 	public boolean isLeaf(){
-		return childNodes.size() == 0;
+		return childNodes.isEmpty();
 	}
 	
 	public List<MCSTNode> getChildNodes(){
 		return childNodes;
+	}
+	
+	public Boolean wasUpdated(){
+		return wasUpdated;
 	}
 	
 	public float getNodeSelectionValue(){
@@ -95,14 +103,14 @@ public class MCSTNode implements IReusable{
 	public MCSTNode(IAction takenAction, IGameState previousGameState, int nodeLevel)
 	{
 		this.takenAction = takenAction;
-		this.priorProbability = GlobalDefinitions.getPriorProbabilityCalculator().calculate(previousGameState);
+		this.priorProbability = GlobalDefinitions.getPriorProbabilityCalculator().calculate(previousGameState, takenAction);
 		this.nodeLevel = nodeLevel;
 	}
 	
 	public void initalize(IAction takenAction, IGameState previousGameState, int nodeLevel){
 		this.reset();
 		this.takenAction = takenAction;
-		this.priorProbability = GlobalDefinitions.getPriorProbabilityCalculator().calculate(previousGameState);
+		this.priorProbability = GlobalDefinitions.getPriorProbabilityCalculator().calculate(previousGameState, takenAction);
 		this.nodeLevel = nodeLevel;
 	}
 	
@@ -116,6 +124,8 @@ public class MCSTNode implements IReusable{
 		oldActionValue = LAST_ACTION_VALUE_INITAL_VALUE;
 		childNodes = new ArrayList<MCSTNode>();
 		nodeLevel = 0;
+		winingChildNode = null;
+		wasUpdated = false;
 	}
 	
 	/**
@@ -123,20 +133,26 @@ public class MCSTNode implements IReusable{
 	 */
 	public void visitNode(IGameState previousGameState){
 		if(isLeaf()){
-			visitNodeFirstTime(previousGameState);
-			updateNode(null);
+			if (getVisitCount() == 0){
+				visitNodeFirstTime(previousGameState);
+				updateNode(true, null);
+			} else {
+				updateNode(false, null);
+			}
 		} else {
 			MCSTNode child = selectChildNode();
 			if (child == null){
-				if (evaluationValue == GlobalDefinitions.NODE_EVALUATION_LOWER_BOUND || 
-						evaluationValue == GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND){
-					LOGGER.log("Node with game ending state was visited the " + visitCount + "time");
-				} else {
-					LOGGER.log("It was tried to select a child node although there was none");
-				}
+				LOGGER.log("It was tried to select a child node although there was none");
 			} else {
+				if (evaluationValue == GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND){
+					LOGGER.log("Node with game ending state was visited the " + visitCount + " time");
+				}
 				child.visitNode(this.gameState);
-				updateNode(child);
+				//If winning node, then store it
+				if (child.getEvaluationValue() == GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND){
+					this.winingChildNode = child;
+				}
+				updateNode(child.wasUpdated(), child);
 			}
 		}
 		increaseVisitCount();
@@ -144,7 +160,7 @@ public class MCSTNode implements IReusable{
 	}
 	
 	public IAction getActionWithMostVisits(){
-		if (childNodes.size() == 0) return null;
+		if (childNodes.isEmpty()) return null;
 		
 		MCSTNode currentlyMostVisitedNode = childNodes.get(0);
 		for (int i = 1; i < childNodes.size(); i++) {
@@ -169,10 +185,10 @@ public class MCSTNode implements IReusable{
 			this.gameState = previousGameState.simulateAction(takenAction);
 		}
 		evaluateNode();
-		if (evaluationValue == GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND){//Upper bound = win
+		if (getEvaluationValue() == GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND){//Upper bound = win
 			return;
 		}
-		if (evaluationValue == GlobalDefinitions.NODE_EVALUATION_LOWER_BOUND){//Lower bound = loss
+		if (getEvaluationValue() == GlobalDefinitions.NODE_EVALUATION_LOWER_BOUND){//Lower bound = loss
 			return;
 		}
 		List<IAction> allowedActions = getGameState().getAllowedActions();
@@ -184,7 +200,9 @@ public class MCSTNode implements IReusable{
 	}
 	
 	private MCSTNode selectChildNode(){
-		if (childNodes.size() == 0) return null;
+		if (childNodes.isEmpty()) return null;
+		//If wining child node exists, visit it
+		if (winingChildNode != null) return winingChildNode;
 		
 		MCSTNode currentlyHighestNode = childNodes.get(0);
 		for (int i = 1; i < childNodes.size(); i++) {
@@ -201,10 +219,16 @@ public class MCSTNode implements IReusable{
 		evaluationValue = evaluationCalculator.calculate(this);
 	}
 	
-	private void updateNode(MCSTNode updatedChildNode){
-		IActionValueCalculator actionValueCalculator = GlobalDefinitions.getActionValueCalculator();
-		setActionValue(actionValueCalculator.calculate(this, updatedChildNode));
-		updateNodeSelectionValue();
+	private void updateNode(Boolean needsUpdate, MCSTNode updatedChildNode){
+		if (needsUpdate){
+			IActionValueCalculator actionValueCalculator = GlobalDefinitions.getActionValueCalculator();
+			setActionValue(actionValueCalculator.calculate(this, updatedChildNode));
+			updateNodeSelectionValue();
+			wasUpdated = true;
+		} else {
+			wasUpdated = false;
+		}
+		
 	}
 
 }

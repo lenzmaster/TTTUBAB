@@ -2,6 +2,7 @@ package bot.actionvaluecalculation;
 
 
 import bot.mcst.MCSTNode;
+import bot.util.GlobalDefinitions;
 
 public class FirstActionValueCalculator implements IActionValueCalculator{
 
@@ -15,6 +16,9 @@ public class FirstActionValueCalculator implements IActionValueCalculator{
 			float cleanedActionValue = node.getActionValue() * (node.getVisitCount() -1);
 			//Add new action value of child and average again
 			newActionValue = (cleanedActionValue + lastUpdatedChildNode.getActionValue()) / node.getVisitCount();
+		} else if (lastUpdatedChildNode.getEvaluationValue() == GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND) {//child was wining node --> only care about winning child, when calculating the action value
+			newActionValue = (node.getEvaluationValue() + lastUpdatedChildNode.getEvaluationValue()) / 2;
+		
 		} else {//Child was part of the last average calculation
 			//Old value needs to be removed from the average value
 			//reverse devision by old visit count

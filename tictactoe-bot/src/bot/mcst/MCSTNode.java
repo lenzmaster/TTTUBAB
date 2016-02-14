@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bot.Move;
+import bot.Player;
+import bot.Player.PlayerTypes;
 import bot.actionvaluecalculation.IActionValueCalculator;
 import bot.memory.IReusable;
 import bot.memory.ObjectManager;
@@ -28,7 +30,7 @@ public class MCSTNode implements IReusable{
 	private float nodeSelectionValue = -1;
 	private int nodeLevel;
 	private MCSTNode winingChildNode;
-	private Boolean wasUpdated = false;
+	private Boolean actionValueUpdated = false;
 	
 	
 	public IAction getTakenAction() {
@@ -76,21 +78,24 @@ public class MCSTNode implements IReusable{
 		return childNodes;
 	}
 	
-	public Boolean wasUpdated(){
-		return wasUpdated;
+	public Boolean wasActionValueUpdated(){
+		return actionValueUpdated;
 	}
 	
 	public float getNodeSelectionValue(){
 		if (nodeSelectionValue == -1){
 			INodeSelectionValueCalculator nodeSelectionCalculator = GlobalDefinitions.getNodeSelectionValueCalculator();
-			nodeSelectionValue = nodeSelectionCalculator.calculate(this);
+			nodeSelectionValue = nodeSelectionCalculator.calculate(this, takenAction.getPerformingPlayer());
 		}
 		return nodeSelectionValue;
 	}
 	
 	private void updateNodeSelectionValue(){
+		//Check, if root node --> no update needed, since only one root node exists
+		if (takenAction == null) return;
+		
 		INodeSelectionValueCalculator nodeSelectionCalculator = GlobalDefinitions.getNodeSelectionValueCalculator();
-		nodeSelectionValue = nodeSelectionCalculator.calculate(this);
+		nodeSelectionValue = nodeSelectionCalculator.calculate(this, takenAction.getPerformingPlayer());
 	}
 	
 	/**
@@ -125,59 +130,10 @@ public class MCSTNode implements IReusable{
 		childNodes = new ArrayList<MCSTNode>();
 		nodeLevel = 0;
 		winingChildNode = null;
-		wasUpdated = false;
+		actionValueUpdated = false;
 	}
 	
-	/**
-	 * Visits the node and thus executes one monte carlo iteration.
-	 */
-	public void visitNode(IGameState previousGameState){
-		if(isLeaf()){
-			if (getVisitCount() == 0){
-				visitNodeFirstTime(previousGameState);
-				updateNode(true, null);
-			} else {
-				updateNode(false, null);
-			}
-		} else {
-			MCSTNode child = selectChildNode();
-			if (child == null){
-				LOGGER.log("It was tried to select a child node although there was none");
-			} else {
-				if (evaluationValue == GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND){
-					LOGGER.log("Node with game ending state was visited the " + visitCount + " time");
-				}
-				child.visitNode(this.gameState);
-				//If winning node, then store it
-				if (child.getEvaluationValue() == GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND){
-					this.winingChildNode = child;
-				}
-				updateNode(child.wasUpdated(), child);
-			}
-		}
-		increaseVisitCount();
-		
-	}
-	
-	public IAction getActionWithMostVisits(){
-		if (childNodes.isEmpty()) return null;
-		
-		MCSTNode currentlyMostVisitedNode = childNodes.get(0);
-		for (int i = 1; i < childNodes.size(); i++) {
-			MCSTNode child = childNodes.get(i);
-			if (child.getVisitCount() == currentlyMostVisitedNode.getVisitCount()){
-				if (child.getActionValue() > currentlyMostVisitedNode.getActionValue()){
-					currentlyMostVisitedNode = child;
-				}
-			} else if (child.getVisitCount() > currentlyMostVisitedNode.getVisitCount()){
-				currentlyMostVisitedNode = child;
-			}
-		}
-		LOGGER.log("Action taken with value: " + currentlyMostVisitedNode.getActionValue());
-		LOGGER.log("Action taken with visit amount of: " + currentlyMostVisitedNode.getVisitCount());
-		return currentlyMostVisitedNode.getTakenAction();
-	}
-	
+
 	private void visitNodeFirstTime(IGameState previousGameState){
 		if (takenAction == null){//root --> no action need to be taken
 			this.gameState = previousGameState;
@@ -204,14 +160,29 @@ public class MCSTNode implements IReusable{
 		//If wining child node exists, visit it
 		if (winingChildNode != null) return winingChildNode;
 		
-		MCSTNode currentlyHighestNode = childNodes.get(0);
+		MCSTNode currentlyBestNode = childNodes.get(0);
+		Player playerAtTurn = getGameState().getPlayerAtTurn();
+		if (playerAtTurn == null){
+			LOGGER.log("PlayerAtTurn is null!");
+			return null;
+		}
 		for (int i = 1; i < childNodes.size(); i++) {
 			MCSTNode child = childNodes.get(i);
-			if(child.getNodeSelectionValue() > currentlyHighestNode.getNodeSelectionValue()){
-				currentlyHighestNode = child;
-			}
+			//if (playerAtTurn == Player.getPlayer(PlayerTypes.Self)){
+				if(child.getNodeSelectionValue() > currentlyBestNode.getNodeSelectionValue()){
+					currentlyBestNode = child;
+				}
+//			} else if (playerAtTurn == Player.getPlayer(PlayerTypes.Opponent)){
+//				if(child.getNodeSelectionValue() < currentlyBestNode.getNodeSelectionValue()){
+//					currentlyBestNode = child;
+//				}
+//			} else {
+//				LOGGER.log("Player of Turn not correctly set: " + playerAtTurn.getPlayerType().name());
+//				return null;
+//			}
+				
 		}
-		return currentlyHighestNode;
+		return currentlyBestNode;
 	}
 	
 	private void evaluateNode(){
@@ -219,16 +190,90 @@ public class MCSTNode implements IReusable{
 		evaluationValue = evaluationCalculator.calculate(this);
 	}
 	
-	private void updateNode(Boolean needsUpdate, MCSTNode updatedChildNode){
-		if (needsUpdate){
+	private void updateNode(Boolean needToUpdateActionValue, MCSTNode updatedChildNode){
+		if (needToUpdateActionValue){
 			IActionValueCalculator actionValueCalculator = GlobalDefinitions.getActionValueCalculator();
 			setActionValue(actionValueCalculator.calculate(this, updatedChildNode));
-			updateNodeSelectionValue();
-			wasUpdated = true;
+			actionValueUpdated = true;
 		} else {
-			wasUpdated = false;
+			actionValueUpdated = false;
 		}
+		updateNodeSelectionValue();
 		
 	}
-
+	
+	/**
+	 * Visits the node and thus executes one monte carlo iteration.
+	 */
+	public void visitNode(IGameState previousGameState){
+		if(isLeaf()){
+			if (getVisitCount() == 0){
+				visitNodeFirstTime(previousGameState);
+				updateNode(true, null);
+			} else {
+				updateNode(false, null);
+			}
+		} else {
+			MCSTNode child = selectChildNode();
+			if (child == null){
+				LOGGER.log("It was tried to select a child node although there was none");
+			} else {
+				if (evaluationValue == GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND){
+					LOGGER.log("Node with game ending state was visited the " + visitCount + " time");
+				}
+				child.visitNode(this.gameState);
+				//If winning node, then store it
+				if (child.getEvaluationValue() == GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND){
+					this.winingChildNode = child;
+				}
+				updateNode(child.wasActionValueUpdated(), child);
+			}
+		}
+		increaseVisitCount();
+		
+	}
+	
+	public IAction getActionWithMostVisits(){
+		if (childNodes.isEmpty()) return null;
+		
+		MCSTNode currentlyMostVisitedNode = childNodes.get(0);
+		for (int i = 1; i < childNodes.size(); i++) {
+			MCSTNode child = childNodes.get(i);
+			if (child.getVisitCount() == currentlyMostVisitedNode.getVisitCount()){
+				if (child.getActionValue() > currentlyMostVisitedNode.getActionValue()){
+					currentlyMostVisitedNode = child;
+				}
+			} else if (child.getVisitCount() > currentlyMostVisitedNode.getVisitCount()){
+				currentlyMostVisitedNode = child;
+			}
+		}
+		LOGGER.log("Action taken with value: " + currentlyMostVisitedNode.getActionValue());
+		LOGGER.log("Action taken with visit amount of: " + currentlyMostVisitedNode.getVisitCount());
+		return currentlyMostVisitedNode.getTakenAction();
+	}
+	
+	public void printTree(){
+		StringBuilder printRepresentationOfNode = new StringBuilder();
+		for (int i = 0; i < nodeLevel; i++){
+			printRepresentationOfNode.append(" ");
+		}
+		printRepresentationOfNode.append(nodeLevel);
+		printRepresentationOfNode.append(": ");
+		if (takenAction != null){
+			printRepresentationOfNode.append(takenAction.toString());
+		}
+		printRepresentationOfNode.append(" - ");
+		printRepresentationOfNode.append("a-value " + getActionValue());
+		if (takenAction != null){
+			printRepresentationOfNode.append("; ");
+			printRepresentationOfNode.append("n.sel-value " + getNodeSelectionValue());
+		}
+		printRepresentationOfNode.append("; ");
+		printRepresentationOfNode.append("visits " + getVisitCount());
+		
+		System.out.println(printRepresentationOfNode.toString());
+		for (MCSTNode mcstNode : childNodes) {
+			mcstNode.printTree();
+		}
+	}
 }

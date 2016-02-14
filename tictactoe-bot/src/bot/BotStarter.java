@@ -39,6 +39,12 @@ public class BotStarter {
 
 	private static Logger LOGGER = new Logger("BotStarter");
 	
+	private MCSTTree tree = null;
+	
+	public MCSTTree getTree(){
+		return tree;
+	}
+	
     /**
      * Makes a turn. Edit this method to make your bot smarter.
      * Currently does only random moves.
@@ -49,7 +55,7 @@ public class BotStarter {
 		field.setPlayerAtTurn(Player.getPlayer(PlayerTypes.Self));
 		LOGGER.log("Total time left (in ms): " + totalTimeLeft);
 		long turnTimeInNS = 1000000 * GlobalDefinitions.TIME_USED_PER_TURN;
-		MCSTTree tree = ObjectManager.getNewMCSTTree();
+		tree = ObjectManager.getNewMCSTTree();
 		tree.initalize(ObjectManager.getNewMCSTNode());
 		IAction action = tree.calculateBestAction(field, turnTimeInNS);
 		return ((Move) action);

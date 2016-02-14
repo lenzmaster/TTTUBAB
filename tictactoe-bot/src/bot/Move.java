@@ -71,5 +71,14 @@ public class Move implements IAction, IReusable{
 	
 	public Player getPlayer() { return player;}
 
+	@Override
+	public String toString(){
+		return "(" + getX() + "/" + getY() + ")";
+	}
+
+	@Override
+	public Player getPerformingPlayer() {
+		return getPlayer();
+	}
 	
 }

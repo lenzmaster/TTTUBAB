@@ -52,4 +52,9 @@ public class MCSTTree implements IReusable{
 		return root.getActionWithMostVisits();
 	}
 	
+	
+	public void print(){
+		System.out.println("Tree: ");
+		root.printTree();
+	}
 }

@@ -57,6 +57,16 @@ public class Field implements IGameState, IReusable{
 			return this.playerAtTurn;
 		}
 		
+		public int[][] getCopyOfBoard(){
+			int[][] copyOfBoard = new int[COLS][ROWS];
+			for (int i = 0; i < this.mBoard.length; i++){
+				for (int j = 0; j < this.mBoard[i].length; j++){
+					copyOfBoard[i][j] = this.mBoard[i][j];
+				}
+			}
+			return copyOfBoard;
+		}
+		
 		public Field() {
 			mBoard = new int[COLS][ROWS];
 			mMacroboard = new int[COLS / 3][ROWS / 3];

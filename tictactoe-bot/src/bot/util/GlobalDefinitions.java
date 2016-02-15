@@ -2,8 +2,10 @@ package bot.util;
 
 import bot.actionvaluecalculation.FirstActionValueCalculator;
 import bot.actionvaluecalculation.IActionValueCalculator;
+import bot.nodeevaluation.ConicalCombinationEvaluationValueCalculator;
 import bot.nodeevaluation.FirstNodeEvaluationValueCalculator;
 import bot.nodeevaluation.INodeEvaluationValueCalculator;
+import bot.nodeevaluation.MacroStrategyEvaluationFunction;
 import bot.nodeselectioncalculation.FirstNodeSelectionValueCalculator;
 import bot.nodeselectioncalculation.INodeSelectionValueCalculator;
 import bot.priorprobabilitycalculation.IPriorProbabilityCalculator;
@@ -22,16 +24,19 @@ public class GlobalDefinitions {
 	public static final int MACRO_FIELD_NEEDS_TO_BE_USED_ID = -1;
 	
 	//Prior probability constants
+	//Neutral element needs to be in the middle of the lower and upper bound
 	public static final float NODE_PRIOR_PROBABILITY_LOWER_BOUND = 0.0f;
 	public static final float NODE_PRIOR_PROBABILITY_UPPER_BOUND = 1.0f;
 	public static final float NODE_PRIOR_PROBABILITY_NEUTRAL_VALUE = 0.5f;
 	
 	//Node evaluation constants
+	//Neutral element needs to be in the middle of the lower and upper bound
 	public static final float NODE_EVALUATION_LOWER_BOUND = 0.0f;
 	public static final float NODE_EVALUATION_UPPER_BOUND = 1.0f;
 	public static final float NODE_EVALUATION_NEUTRAL_VALUE = 0.5f;
 	
 	//Action value constants
+	//Neutral element needs to be in the middle of the lower and upper bound
 	public static final float ACTION_VALUE_LOWER_BOUND = 0.0f;
 	public static final float ACTION_VALUE_UPPER_BOUND = 1.0f;
 	public static final float ACTION_VALUE_NEUTRAL_VALUE = 0.5f;
@@ -69,7 +74,9 @@ public class GlobalDefinitions {
 	
 	public static INodeEvaluationValueCalculator getNodeEvaluationCalculator(){
 		if (_nodeEvaluationCalculator == null){
-			_nodeEvaluationCalculator = new FirstNodeEvaluationValueCalculator();
+			ConicalCombinationEvaluationValueCalculator calculator = new ConicalCombinationEvaluationValueCalculator();
+			calculator.addFunction(1, new MacroStrategyEvaluationFunction());
+			_nodeEvaluationCalculator = calculator;
 		}
 		return _nodeEvaluationCalculator;
 	}

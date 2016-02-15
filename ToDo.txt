@@ -1,0 +1,7 @@
+1. PriorProbabilityCaluculators and NodeEvaluationCalclulators evaluate always symmetically (from a neutral point of view/ perspective of both players)
+2. Implementation of test cases for the creation, extension and backpropagation of MCSTTrees
+3. Implementation of universal structure that allows flexblely adding and removing calculations in a wieghted addition of these calaculations; applicable in PriorProbabilityCaluculators and NodeEvaluationCalclulators
+
+
+Precision of float is too bad for certain operations --> significant loss of precision --> a better data type needs to be used
+Improve perfomance of computations by using longs

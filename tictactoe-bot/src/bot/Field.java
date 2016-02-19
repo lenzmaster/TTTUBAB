@@ -111,7 +111,8 @@ public class Field implements IGameState, IReusable{
 		 * @param board a 3x3 board as two dimensional array
 		 * @return the winner or null, if no one has won yet
 		 */
-		public int calculateWinnerInBoard(int[][] board){	
+		public int calculateWinnerInBoard(int[][] board){
+			//ToDo: Rewrite this method by using the WinningOptions enum
 			for (int i = 0; i < 3; i++){
 				//Check horizontal
 				if(board[0][i] != GlobalDefinitions.PLAYER_NEUTRAL_ID &&

@@ -6,6 +6,7 @@ import bot.nodeevaluation.ConicalCombinationEvaluationValueCalculator;
 import bot.nodeevaluation.FirstNodeEvaluationValueCalculator;
 import bot.nodeevaluation.INodeEvaluationValueCalculator;
 import bot.nodeevaluation.MacroStrategyEvaluationFunction;
+import bot.nodeevaluation.NodeEvaluationCalculatorFactory;
 import bot.nodeselectioncalculation.FirstNodeSelectionValueCalculator;
 import bot.nodeselectioncalculation.INodeSelectionValueCalculator;
 import bot.priorprobabilitycalculation.IPriorProbabilityCalculator;
@@ -57,7 +58,7 @@ public class GlobalDefinitions {
 		return _probabilityCalculator;
 	}
 
-	
+		
 	public static INodeSelectionValueCalculator getNodeSelectionValueCalculator(){
 		if (_nodeSelectionValueCalculator == null){
 			_nodeSelectionValueCalculator = new FirstNodeSelectionValueCalculator();
@@ -74,9 +75,7 @@ public class GlobalDefinitions {
 	
 	public static INodeEvaluationValueCalculator getNodeEvaluationCalculator(){
 		if (_nodeEvaluationCalculator == null){
-			ConicalCombinationEvaluationValueCalculator calculator = new ConicalCombinationEvaluationValueCalculator();
-			calculator.addFunction(1, new MacroStrategyEvaluationFunction());
-			_nodeEvaluationCalculator = calculator;
+			_nodeEvaluationCalculator = NodeEvaluationCalculatorFactory.createWinningOptionOnlyCalculator();
 		}
 		return _nodeEvaluationCalculator;
 	}

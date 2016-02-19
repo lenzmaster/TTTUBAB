@@ -8,5 +8,10 @@ public class CalculationHelper {
 		
 	}
 	
+	public static float invertNodeEvaluationValue(float nodeEvaluationValue){
+		float differenceToNeutralNodeEvaluationValue = GlobalDefinitions.NODE_EVALUATION_NEUTRAL_VALUE - nodeEvaluationValue;
+		return GlobalDefinitions.NODE_EVALUATION_NEUTRAL_VALUE + differenceToNeutralNodeEvaluationValue;
+		
+	}
 	
 }

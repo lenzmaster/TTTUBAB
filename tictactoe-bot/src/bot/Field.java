@@ -39,8 +39,8 @@ import bot.util.Logger;
 
 public class Field implements IGameState, IReusable{
 	
-		private Logger LOGGER = new Logger("Field");
-		private final int COLS = 9, ROWS = 9;
+		private static Logger LOGGER = new Logger("Field");
+		public static final int COLS = 9, ROWS = 9;
 	
 	   	private int mRoundNr;
 	    private int mMoveNr;
@@ -55,6 +55,14 @@ public class Field implements IGameState, IReusable{
 		@Override
 		public Player getPlayerAtTurn(){
 			return this.playerAtTurn;
+		}
+		
+		public int getRoundNr(){
+			return mRoundNr;
+		}
+		
+		public int getMoveNr(){
+			return mMoveNr;
 		}
 		
 		public int[][] getCopyOfBoard(){
@@ -103,6 +111,21 @@ public class Field implements IGameState, IReusable{
 			copy.playerAtTurn = this.playerAtTurn;
 			
 			return copy;
+			
+		}
+		
+		//ToDo: Implement the method and its usage more efficiently
+		private boolean isMicroboardFull(int microboardX, int microboardY){
+			int startX = microboardX * 3;
+			int startY = microboardY * 3;
+			for (int i = 0; i < 3; i++){
+				for (int j = 0; j < 3; j++){
+					if (mBoard[startX + i][startY + j] == GlobalDefinitions.PLAYER_NEUTRAL_ID){
+						return false;
+					}
+				}
+			}
+			return true;
 			
 		}
 		
@@ -424,12 +447,25 @@ public class Field implements IGameState, IReusable{
 			//Check, if new field is won
 			mMacroboard[macroCoordinates.getX()][macroCoordinates.getY()] = calculateWinnerInBoard(microboard);
 			Point newMacroField = calculateMacroCoordinatesForNextMove(move);
+			boolean isEveryFieldAllowed;
+			if (newMacroField == null){
+				isEveryFieldAllowed = true;
+			} else {
+				if (isMicroboardFull(newMacroField.getX(), newMacroField.getY())){
+					isEveryFieldAllowed = true;
+				} else {
+					isEveryFieldAllowed = false;
+				}
+			}
+			
 			//Update macroboard for new move
 			for (int i = 0; i < mMacroboard.length; i++){
 				for (int j = 0; j < mMacroboard[i].length; j++){
-					if (newMacroField == null){//Is every Field is allowed?
+					if (isEveryFieldAllowed){//Is every Field allowed?
 						if (mMacroboard[i][j] == GlobalDefinitions.PLAYER_NEUTRAL_ID){
-							mMacroboard[i][j] = GlobalDefinitions.MACRO_FIELD_NEEDS_TO_BE_USED_ID;
+							if (!isMicroboardFull(i, j)){
+								mMacroboard[i][j] = GlobalDefinitions.MACRO_FIELD_NEEDS_TO_BE_USED_ID;
+							}
 						}
 					} else {//Only the new macro field is allowed
 						if (newMacroField.getX() == i && newMacroField.getY() == j){//Is it the field for the new move?
@@ -444,6 +480,7 @@ public class Field implements IGameState, IReusable{
 				}
 			}
 				
+			//Update move and round counter
 			mMoveNr++;
 			if(mMoveNr % 2 == 1){
 				mRoundNr++;
@@ -457,5 +494,77 @@ public class Field implements IGameState, IReusable{
 		public Player getWinner(){
 			return Player.getPlayer(calculateWinnerInBoard(mMacroboard));
 		}
-	
+		
+		
+		public Move getPerformedMove(int[][] newBoard){
+			Move performedMove = ObjectManager.getNewMove();
+			for (int i = 0; i < this.mBoard.length; i++){
+				for (int j = 0; j < this.mBoard[i].length; j++){
+					if (this.mBoard[i][j] != newBoard[i][j]){
+						performedMove.initalize(i, j, this.playerAtTurn);
+						return performedMove;
+					}
+				}
+			}
+			return null;
+		}
+		
+		/**
+		 * returns a the macroboard as comma separated string
+		 * @return
+		 */
+		public String getMacroBoardAsString(){
+			StringBuilder builder = new StringBuilder(9);
+			for (int i = 0; i < this.mMacroboard.length; i++){
+				for (int j = 0; j < this.mMacroboard[i].length; j++){
+					String stringToAppend = (i == 0 && j == 0) ? "" + this.mMacroboard[i][j] : "," + this.mMacroboard[i][j];
+					builder.append(stringToAppend);
+				}
+			}
+			return builder.toString();
+		}
+		
+		@Override
+		public boolean equals(Object o){
+
+	        // If the object is compared with itself then return true  
+	        if (o == this) {
+	            return true;
+	        }
+
+	        /* Check if o is an instance of Field or not
+	          "null instanceof [type]" also returns false */
+	        if (!(o instanceof Field)) {
+	            return false;
+	        }
+	        
+	        // typecast o to Field so that we can compare data members 
+	        Field field = (Field) o;	
+	        
+	        //Check equality based on member variables
+	        if (this.mRoundNr != field.mRoundNr) return false;
+	        
+	        if (this.mMoveNr != field.mMoveNr) return false;
+		    
+	        for (int i = 0; i < this.mBoard.length; i++){
+	        	for (int j = 0; j < this.mBoard[i].length; j++){
+	        		if (this.mBoard[i][j] != field.mBoard[i][j]){
+	        			return false;
+	        		}
+	        	}
+	        }
+	        
+	        for (int i = 0; i < this.mMacroboard.length; i++){
+	        	for (int j = 0; j < this.mMacroboard[i].length; j++){
+	        		if (this.mMacroboard[i][j] != field.mMacroboard[i][j]){
+	        			return false;
+	        		}
+	        	}
+	        }
+		    
+		    if (!this.playerAtTurn.equals(field.playerAtTurn)) return false;
+	        
+	        return true;
+		}
+		
 }

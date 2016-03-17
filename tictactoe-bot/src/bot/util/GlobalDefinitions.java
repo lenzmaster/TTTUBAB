@@ -75,7 +75,7 @@ public class GlobalDefinitions {
 	
 	public static INodeEvaluationValueCalculator getNodeEvaluationCalculator(){
 		if (_nodeEvaluationCalculator == null){
-			_nodeEvaluationCalculator = NodeEvaluationCalculatorFactory.createWinningOptionOnlyCalculator();
+			_nodeEvaluationCalculator = NodeEvaluationCalculatorFactory.createWinningOptionWithDiminishingReturnsOnlyCalculator();
 		}
 		return _nodeEvaluationCalculator;
 	}

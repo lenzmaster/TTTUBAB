@@ -202,7 +202,8 @@ public class WinningOptionEvaluationFunction extends ConicalCombinationFunctionA
 		}
 		
 		float lnOfSum = (float) Math.log(winningOptionScoreSum);
-		//Check if board was not yet played
+		//Minus values are not allowed
+		//ToDo: Check all of these assumptions
 		if (lnOfSum < 0){
 			return this.lowerBound;
 		}
@@ -229,7 +230,7 @@ public class WinningOptionEvaluationFunction extends ConicalCombinationFunctionA
 				Player winner = getWinner(microboard);
 				if (winner.getPlayerType() == PlayerTypes.None){
 					//Board not won
-					//Use formulars...
+					//Use formulas...
 					//a. Calculate winning option scores
 					float[][] microboardSelf = getMicroboard(transformedBoardSelf, macroX, macroY);
 					float[] winningOptionScoresSelf = this.calcWinningOptionScores(microboardSelf);
@@ -242,12 +243,12 @@ public class WinningOptionEvaluationFunction extends ConicalCombinationFunctionA
 					
 				} else if (winner.getPlayerType() == PlayerTypes.Self){
 					//Board won by self
-					macroBoardSelf[macroX][macroY] = 1;// 1, becuase won by self
-					macroBoardOpponent[macroX][macroY] = 0;//0, because oponent lost board
+					macroBoardSelf[macroX][macroY] = 1;// 1, because won by self
+					macroBoardOpponent[macroX][macroY] = 0;//0, because opponent lost board
 				} else {
 					//Board won by opponent
-					macroBoardSelf[macroX][macroY] = 0;// 1, becuase one lost that board
-					macroBoardOpponent[macroX][macroY] = 1;//0, because oponent won fboard
+					macroBoardSelf[macroX][macroY] = 0;// 1, because one lost that board
+					macroBoardOpponent[macroX][macroY] = 1;//0, because opponent won board
 				}
 				
 			}
@@ -266,7 +267,11 @@ public class WinningOptionEvaluationFunction extends ConicalCombinationFunctionA
 		//3.Aggregate both macroboard scores to one score --> node evaluation score
 		//Invert node evaluation value of opponent
 		float scoreDifferenceOfPlayers = macroBoardScoreSelf - macroBoardScoreOpponent;
-		float normedScoreDifference = GlobalDefinitions.NODE_EVALUATION_NEUTRAL_VALUE * scoreDifferenceOfPlayers;
+		//ToDo: Delete the ugly 0.75 and clean up the algorithm
+		//The 0.75 only exists because some cases lead to a normed score difference higher than 0.5
+		//This should never be the case. Therefore, this dirty solution.... 
+		float normedScoreDifference = GlobalDefinitions.NODE_EVALUATION_NEUTRAL_VALUE * 
+				scoreDifferenceOfPlayers * 0.75f; 
 		if (normedScoreDifference > 0.5 || normedScoreDifference < -0.5){
 			LOGGER.log("Absolute normed score differnece is above 0.5: " + normedScoreDifference);
 			if (normedScoreDifference > 0.5){

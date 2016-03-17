@@ -182,6 +182,73 @@ public class FieldTest {
 		
 	}
 	
-	
+	@Test
+	public void testCalculateMacroCoordinatesForNextMove(){
+		//test next move in field (0/0) from field (0/0)
+		Move move = new Move(0, 0, Player.getPlayer(PlayerTypes.Self));
+		Point result = testFieldInstance.calculateMacroCoordinatesForNextMove(move);
+		assertTrue("test next move in field (0/0) from field (0/0) - X coordinate is " + result.getX(), result.getX() == 0);
+		assertTrue("test next move in field (0/0) from field (0/0) - Y coordinate is " + result.getY(), result.getY() == 0);
+		
+		//test next move in field (0/0) from field (1/1)
+		move = new Move(3, 3, Player.getPlayer(PlayerTypes.Self));
+		result = testFieldInstance.calculateMacroCoordinatesForNextMove(move);
+		assertTrue("test next move in field (0/0) from field (1/1) - X coordinate is " + result.getX(), result.getX() == 0);
+		assertTrue("test next move in field (0/0) from field (1/1) - Y coordinate is " + result.getY(), result.getY() == 0);
+		
+		//test next move in field (0/0) from field (2/2)
+		move = new Move(6, 6, Player.getPlayer(PlayerTypes.Self));
+		result = testFieldInstance.calculateMacroCoordinatesForNextMove(move);
+		assertTrue("test next move in field (0/0) from field (2/2) - X coordinate is " + result.getX(), result.getX() == 0);
+		assertTrue("test next move in field (0/0) from field (2/2) - Y coordinate is " + result.getY(), result.getY() == 0);
+		
+		//test next move in field (1/0) from field (1/1)
+		move = new Move(4, 3, Player.getPlayer(PlayerTypes.Self));
+		result = testFieldInstance.calculateMacroCoordinatesForNextMove(move);
+		assertTrue("test next move in field (1/0) from field (1/1) - X coordinate is " + result.getX(), result.getX() == 1);
+		assertTrue("test next move in field (1/0) from field (1/1) - Y coordinate is " + result.getY(), result.getY() == 0);
+		
+		//test next move in field (2/0) from field (1/1)
+		move = new Move(5, 3, Player.getPlayer(PlayerTypes.Self));
+		result = testFieldInstance.calculateMacroCoordinatesForNextMove(move);
+		assertTrue("test next move in field (2/0) from field (1/1) - X coordinate is " + result.getX(), result.getX() == 2);
+		assertTrue("test next move in field (2/0) from field (1/1) - Y coordinate is " + result.getY(), result.getY() == 0);
+		
+		//test next move in field (0/1) from field (1/1)
+		move = new Move(3, 4, Player.getPlayer(PlayerTypes.Self));
+		result = testFieldInstance.calculateMacroCoordinatesForNextMove(move);
+		assertTrue("test next move in field (0/1) from field (1/1) - X coordinate is " + result.getX(), result.getX() == 0);
+		assertTrue("test next move in field (0/1) from field (1/1) - Y coordinate is " + result.getY(), result.getY() == 1);
+		
+		//test next move in field (1/1) from field (1/1)
+		move = new Move(4, 4, Player.getPlayer(PlayerTypes.Self));
+		result = testFieldInstance.calculateMacroCoordinatesForNextMove(move);
+		assertTrue("test next move in field (1/1) from field (1/1) - X coordinate is " + result.getX(), result.getX() == 1);
+		assertTrue("test next move in field (1/1) from field (1/1) - Y coordinate is " + result.getY(), result.getY() == 1);
+		
+		//test next move in field (2/1) from field (1/1)
+		move = new Move(5, 4, Player.getPlayer(PlayerTypes.Self));
+		result = testFieldInstance.calculateMacroCoordinatesForNextMove(move);
+		assertTrue("test next move in field (2/1) from field (1/1) - X coordinate is " + result.getX(), result.getX() == 2);
+		assertTrue("test next move in field (2/1) from field (1/1) - Y coordinate is " + result.getY(), result.getY() == 1);
+		
+		//test next move in field (0/2) from field (1/1)
+		move = new Move(3, 5, Player.getPlayer(PlayerTypes.Self));
+		result = testFieldInstance.calculateMacroCoordinatesForNextMove(move);
+		assertTrue("test next move in field (0/2) from field (1/1) - X coordinate is " + result.getX(), result.getX() == 0);
+		assertTrue("test next move in field (0/2) from field (1/1) - Y coordinate is " + result.getY(), result.getY() == 2);
+		
+		//test next move in field (1/2) from field (1/1)
+		move = new Move(4, 5, Player.getPlayer(PlayerTypes.Self));
+		result = testFieldInstance.calculateMacroCoordinatesForNextMove(move);
+		assertTrue("test next move in field (1/2) from field (1/1) - X coordinate is " + result.getX(), result.getX() == 1);
+		assertTrue("test next move in field (1/2) from field (1/1) - Y coordinate is " + result.getY(), result.getY() == 2);
+		
+		//test next move in field (2/2) from field (1/1)
+		move = new Move(5, 5, Player.getPlayer(PlayerTypes.Self));
+		result = testFieldInstance.calculateMacroCoordinatesForNextMove(move);
+		assertTrue("test next move in field (2/2) from field (1/1) - X coordinate is " + result.getX(), result.getX() == 2);
+		assertTrue("test next move in field (2/2) from field (1/1) - Y coordinate is " + result.getY(), result.getY() == 2);
+	}
 	
 }

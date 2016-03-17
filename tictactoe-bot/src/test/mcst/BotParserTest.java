@@ -22,6 +22,7 @@ import org.junit.Test;
 import bot.BotParser;
 import bot.BotStarter;
 import bot.memory.ObjectManager;
+import bot.Field;
 
 //ToDo: create test files (to read from) for the different test cases
 public class BotParserTest {
@@ -112,7 +113,7 @@ public class BotParserTest {
 				System.out.println(result);
 			}
 		}
-		testInstanceParser.getField().printBoard();
+		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
 		
 		
 	}
@@ -151,7 +152,7 @@ public class BotParserTest {
 				System.out.println(result);
 			}
 		}
-		testInstanceParser.getField().printBoard();
+		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
 		
 	}
 	
@@ -188,7 +189,7 @@ public class BotParserTest {
 				System.out.println(result);
 			}
 		}
-		testInstanceParser.getField().printBoard();
+		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
 		testInstanceBot.getTree().print();
 	}
 	
@@ -225,7 +226,7 @@ public class BotParserTest {
 				System.out.println(result);
 			}
 		}
-		testInstanceParser.getField().printBoard();
+		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
 		testInstanceBot.getTree().print();
 	}
 }

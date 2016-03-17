@@ -15,4 +15,10 @@ public class NodeEvaluationCalculatorFactory {
 		return calculator;
 	}
 	
+	public static INodeEvaluationValueCalculator createWinningOptionWithDiminishingReturnsOnlyCalculator(){
+		ConicalCombinationEvaluationValueCalculator calculator = new ConicalCombinationEvaluationValueCalculator();
+		calculator.addFunction(1, new WinningOptionEvaluationFunctionWithDiminishingReturns());
+		return calculator;
+	}
+	
 }

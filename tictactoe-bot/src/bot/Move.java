@@ -81,4 +81,28 @@ public class Move implements IAction, IReusable{
 		return getPlayer();
 	}
 	
+	@Override
+	public boolean equals(Object o){
+
+        // If the object is compared with itself then return true  
+        if (o == this) {
+            return true;
+        }
+
+        /* Check if o is an instance of Move or not
+          "null instanceof [type]" also returns false */
+        if (!(o instanceof Move)) {
+            return false;
+        }
+        
+        // typecast o to Move so that we can compare data members 
+        Move move = (Move) o;
+		
+        if (this.x == move.x &&
+        		this.y == move.y &&
+        		this.player == move.player){
+        	return true;
+        }
+        return false;
+	}
 }

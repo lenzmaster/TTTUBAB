@@ -42,6 +42,20 @@ public class WinningOptionEvaluationFunctionTest {
 				nodeEvaluationValue == GlobalDefinitions.NODE_EVALUATION_NEUTRAL_VALUE);
 	}
 
+	/**
+	 * Test field:
+	 * 	1|1|1|1|1|1|2|2|2
+		0|0|0|0|0|0|0|0|0
+		0|0|0|0|0|0|0|0|0
+		2|2|2|1|1|1|2|2|2
+		0|0|0|0|0|0|0|0|0
+		0|0|0|0|0|0|0|0|0
+		1|1|1|0|1|0|2|0|0
+		0|0|0|0|1|0|0|2|1
+		0|0|0|0|0|0|0|0|0
+		
+	 * field to play in: (1/2)
+	 */
 	@Test
 	public void testFinishMove() {
 		//Set up field

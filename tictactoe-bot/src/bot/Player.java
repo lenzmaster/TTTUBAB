@@ -70,4 +70,28 @@ public class Player {
 		setPlayerType(playerType);
 	}
 	
+	@Override
+	public boolean equals(Object o){
+
+        // If the object is compared with itself then return true  
+        if (o == this) {
+            return true;
+        }
+
+        /* Check if o is an instance of Player or not
+          "null instanceof [type]" also returns false */
+        if (!(o instanceof Player)) {
+            return false;
+        }
+        
+        // typecast o to Player so that we can compare data members 
+        Player player = (Player) o;
+		
+        if (this.id == player.id &&
+        		this.playerType == player.playerType){
+        	return true;
+        }
+        return false;
+	}
+	
 }

@@ -29,6 +29,7 @@ public class MCSTNode implements IReusable{
 	private List<MCSTNode> childNodes = new ArrayList<MCSTNode>();
 	private float nodeSelectionValue = -1;
 	private int nodeLevel;
+	private int subTreeDepth = 1;
 	private MCSTNode winingChildNode;
 	private Boolean actionValueUpdated = false;
 	
@@ -90,12 +91,25 @@ public class MCSTNode implements IReusable{
 		return nodeSelectionValue;
 	}
 	
+	public int getSubTreeDepth(){
+		return this.subTreeDepth;
+	}
+	
 	private void updateNodeSelectionValue(){
 		//Check, if root node --> no update needed, since only one root node exists
 		if (takenAction == null) return;
 		
 		INodeSelectionValueCalculator nodeSelectionCalculator = GlobalDefinitions.getNodeSelectionValueCalculator();
 		nodeSelectionValue = nodeSelectionCalculator.calculate(this, takenAction.getPerformingPlayer());
+	}
+	
+	private void updateSubTreeDepth(MCSTNode updatedChildNode){
+		if (updatedChildNode == null) return;
+		
+		int potentialNewDepth = updatedChildNode.subTreeDepth + 1;
+		if (potentialNewDepth > this.subTreeDepth){
+			this.subTreeDepth = potentialNewDepth;
+		}
 	}
 	
 	/**
@@ -199,7 +213,7 @@ public class MCSTNode implements IReusable{
 			actionValueUpdated = false;
 		}
 		updateNodeSelectionValue();
-		
+		updateSubTreeDepth(updatedChildNode);
 	}
 	
 	/**

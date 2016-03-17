@@ -1,5 +1,7 @@
 package bot.mcst;
 
+import java.util.List;
+
 import bot.memory.IReusable;
 import bot.util.Logger;
 
@@ -7,7 +9,25 @@ public class MCSTTree implements IReusable{
 
 	private MCSTNode root = null;
 	
+	private IGameState previousGameState = null;
+	
 	public static Logger LOGGER = new Logger("MCSTTree");
+	
+	public MCSTNode getRoot(){
+		return root;
+	}
+	
+	public void setRoot(MCSTNode newRoot){
+		this.root = newRoot;
+	}
+	
+	public IGameState getPreviousGameState(){
+		return previousGameState;
+	}
+	
+	public void setPreviousGameState(IGameState previousGameState){
+		this.previousGameState = previousGameState;
+	}
 	
 	public MCSTTree() {
 		
@@ -32,13 +52,13 @@ public class MCSTTree implements IReusable{
 	 * @param duration duration in nano seconds
 	 * @return the calculated action
 	 */
-	public IAction calculateBestAction(IGameState gameState, long duration){
+	public IAction calculateBestAction(long duration){
 		long timeElapsed = 0;
 		long longestIterationDuration = 0;
 		long iterationCount = 0;
 		while (duration - (timeElapsed + longestIterationDuration) > 0){
 			long iterationStartTime = System.nanoTime();
-			root.visitNode(gameState);
+			root.visitNode(previousGameState);
 			long iterationDuration = System.nanoTime() - iterationStartTime;
 			if (iterationDuration > longestIterationDuration){
 				longestIterationDuration = iterationDuration;
@@ -52,6 +72,27 @@ public class MCSTTree implements IReusable{
 		return root.getActionWithMostVisits();
 	}
 	
+	/**
+	 * Sets the root of the tree to a child of the root according to the performed action.
+	 * @param performedAction the performed action
+	 * @return true, if a child with the taken action was found; otherwise false
+	 */
+	public boolean setNewRoot(IAction performedAction){
+		List<MCSTNode> childNodes = root.getChildNodes();
+		for (MCSTNode childNode : childNodes) {
+			if (childNode.getTakenAction().equals(performedAction)){
+				this.previousGameState = this.getRoot().getGameState();
+				this.setRoot(childNode);
+				return true;
+			}
+		}
+		LOGGER.log("No child with the given action!");
+		return false;
+	}
+	
+	public int getTreeDepth(){
+		return this.getRoot().getSubTreeDepth();
+	}
 	
 	public void print(){
 		System.out.println("Tree: ");

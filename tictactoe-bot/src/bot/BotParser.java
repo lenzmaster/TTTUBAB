@@ -40,13 +40,8 @@ public class BotParser {
 	final PrintStream outStream;
 	final BotStarter bot;
 
-	private Field mField;
 	private int mBotId = 0;
 	private int opponentBotId = 0;
-	
-	public Field getField(){
-		return mField;
-	}
 
 	public BotParser(BotStarter bot, InputStream inStream, PrintStream outStream) {
 		this.scan = new Scanner(inStream);
@@ -54,9 +49,6 @@ public class BotParser {
 		this.outStream = outStream;
 		//Initalize chached objects
 		ObjectManager.initalize();
-		
-		mField = ObjectManager.getNewField();
-		mField.initalize();
 	}
 
 	public void run() {
@@ -72,8 +64,6 @@ public class BotParser {
 			if (result != null){
 				//ugly, but easier for testing
 				if (result.startsWith("place_move")){
-					mField = ObjectManager.getNewField();
-					mField.initalize();
 					//ObjectManager.reset();
 				}
 				outStream.println(result);
@@ -92,12 +82,12 @@ public class BotParser {
 			}
 			return null;
 		} else if(parts[0].equals("update") && parts[1].equals("game")) { /* new game data */
-		    mField.parseGameData(parts[2], parts[3]);
+		    this.bot.updateGameState(parts[2], parts[3]);
 		    return null;
 		} else if(parts[0].equals("action")) {
 			if (parts[1].equals("move")) { /* move requested */
 				int totalTimeLeft = Integer.parseInt(parts[2]);
-				Move move = this.bot.makeTurn(mField, totalTimeLeft);
+				Move move = this.bot.makeTurn(totalTimeLeft);
 				return "place_move " + move.getX() + " " + move.getY();
 			}
 			return "unknown action";

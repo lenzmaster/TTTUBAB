@@ -9,6 +9,8 @@ public class MCSTTree implements IReusable{
 
 	private MCSTNode root = null;
 	
+	private MCSTNode oldRoot = null;
+	
 	private IGameState previousGameState = null;
 	
 	public static Logger LOGGER = new Logger("MCSTTree");
@@ -18,7 +20,12 @@ public class MCSTTree implements IReusable{
 	}
 	
 	public void setRoot(MCSTNode newRoot){
+		this.oldRoot = this.root;
 		this.root = newRoot;
+	}
+	
+	public MCSTNode getOldRoot(){
+		return this.oldRoot;
 	}
 	
 	public IGameState getPreviousGameState(){

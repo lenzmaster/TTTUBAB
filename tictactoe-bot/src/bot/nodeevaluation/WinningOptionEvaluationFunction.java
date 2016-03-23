@@ -11,10 +11,13 @@ import bot.linearcombinationcalculation.ConicalCombinationFunctionAbstract;
 import bot.util.CalculationHelper;
 import bot.util.GlobalDefinitions;
 import bot.util.Logger;
-import bot.util.WinningOptions;
+import bot.winningoption.WinningOptions;
 
 //ToDo: Consider interdependencies between enemies dominance in a (sub) board and own position
 
+//This code is not refactored and should use the different helper-methods as they are used
+//in the WinningOptionEvaluationFunctionWithDiminishingRetuns class.
+@Deprecated
 public class WinningOptionEvaluationFunction extends ConicalCombinationFunctionAbstract{
 
 	private static int potencyBasis = 7;

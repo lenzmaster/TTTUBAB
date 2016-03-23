@@ -20,6 +20,7 @@ package bot;
 import java.util.ArrayList;
 import java.util.List;
 
+import bot.Player.PlayerTypes;
 import bot.mcst.IAction;
 import bot.mcst.IGameState;
 import bot.memory.IReusable;
@@ -41,6 +42,7 @@ public class Field implements IGameState, IReusable{
 	
 		private static Logger LOGGER = new Logger("Field");
 		public static final int COLS = 9, ROWS = 9;
+		public static final int MACROCOLS = 3, MACROROWS= 3; //TODO: use this in every code
 	
 	   	private int mRoundNr;
 	    private int mMoveNr;
@@ -66,13 +68,29 @@ public class Field implements IGameState, IReusable{
 		}
 		
 		public int[][] getCopyOfBoard(){
-			int[][] copyOfBoard = new int[COLS][ROWS];
+			int[][] copyOfBoard = new int[mBoard.length][mBoard[0].length];
 			for (int i = 0; i < this.mBoard.length; i++){
 				for (int j = 0; j < this.mBoard[i].length; j++){
 					copyOfBoard[i][j] = this.mBoard[i][j];
 				}
 			}
 			return copyOfBoard;
+		}
+		
+		public int[][] getCopyOfMicroboard(int microboardX, int microboardY){
+			int[][] copyOfBoard = new int[COLS/3][ROWS/3];
+			int startX = microboardX * 3;
+			int startY = microboardY * 3;
+			for (int i = 0; i < copyOfBoard.length; i++){
+				for (int j = 0; j < copyOfBoard[i].length; j++){
+					copyOfBoard[i][j] = this.mBoard[startX * 3 + i][startY * 3 + j];
+				}
+			}
+			return copyOfBoard;
+		}
+		
+		public int[][] getCopyOfMacroboard(){
+			return FieldCalculationHelper.copyBoard(mMacroboard);
 		}
 		
 		public Field() {
@@ -115,7 +133,18 @@ public class Field implements IGameState, IReusable{
 		}
 		
 		//ToDo: Implement the method and its usage more efficiently
-		private boolean isMicroboardFull(int microboardX, int microboardY){
+		/**
+		 * Checks, if the given microboard is full or has already been won.
+		 * @param microboardX x coordinate of microboard
+		 * @param microboardY y coordinate of microboard
+		 * @return
+		 */
+		public boolean isMicroboardFullOrWon(int microboardX, int microboardY){
+			int macroboardValue = mMacroboard[microboardX][microboardY];
+			if (macroboardValue != GlobalDefinitions.PLAYER_NEUTRAL_ID
+					&& macroboardValue != GlobalDefinitions.MACRO_FIELD_NEEDS_TO_BE_USED_ID){
+				return true;
+			}
 			int startX = microboardX * 3;
 			int startY = microboardY * 3;
 			for (int i = 0; i < 3; i++){
@@ -135,65 +164,7 @@ public class Field implements IGameState, IReusable{
 		 * @return the winner or null, if no one has won yet
 		 */
 		public int calculateWinnerInBoard(int[][] board){
-			//ToDo: Rewrite this method by using the WinningOptions enum
-			for (int i = 0; i < 3; i++){
-				//Check horizontal
-				if(board[0][i] != GlobalDefinitions.PLAYER_NEUTRAL_ID &&
-						board[0][i] != GlobalDefinitions.MACRO_FIELD_NEEDS_TO_BE_USED_ID &&
-						board[0][i] == board[1][i] &&
-						board[1][i] == board[2][i]){
-					return board[0][i];
-				}
-				//Check vertical
-				if(board[i][0] != GlobalDefinitions.PLAYER_NEUTRAL_ID &&
-						board[i][0] != GlobalDefinitions.MACRO_FIELD_NEEDS_TO_BE_USED_ID &&
-						board[i][0] == board[i][1] &&
-						board[i][1] == board[i][2]){
-					return board[i][0];
-				}
-			}
-			//Check diagonal
-			if(board[0][0] != GlobalDefinitions.PLAYER_NEUTRAL_ID &&
-					board[0][0] != GlobalDefinitions.MACRO_FIELD_NEEDS_TO_BE_USED_ID &&
-					board[0][0] == board[1][1] &&
-					board[1][1] == board[2][2]){
-				return board[0][0];
-			}
-			if(board[0][2] != GlobalDefinitions.PLAYER_NEUTRAL_ID &&
-					board[0][2] != GlobalDefinitions.MACRO_FIELD_NEEDS_TO_BE_USED_ID &&
-					board[0][2] == board[1][1] &&
-					board[1][1] == board[2][0]){
-				return board[0][2];
-			}
-			
-			return GlobalDefinitions.PLAYER_NEUTRAL_ID;
-		}
-		
-		
-		public Point getMacroIndex(Move move){
-			if (move == null) throw new IllegalArgumentException("Move object is null");
-			int moduloX = move.getX() % 9;
-			int macroX = -1;
-			if(moduloX < 3){
-				macroX = 0;
-			} else if (moduloX > 5){
-				macroX = 2;
-			} else {
-				macroX = 1;
-			}
-			
-			int macroY = -1;
-			if(move.getY() < 3){
-				macroY = 0;
-			} else if (move.getY() > 5){
-				macroY = 2;
-			} else {
-				macroY = 1;
-			}
-			
-			Point point = ObjectManager.getNewPoint();
-			point.initalize(macroX, macroY);
-			return point;
+			return FieldCalculationHelper.getWinner(board);
 		}
 
 		/**
@@ -437,7 +408,7 @@ public class Field implements IGameState, IReusable{
 			//Update Player
 			playerAtTurn = Player.getInvertedPlayer(move.getPlayer());
 			//Update macroboard
-			Point macroCoordinates = getMacroIndex(move);
+			Point macroCoordinates = FieldCalculationHelper.getMacroIndex(move.getX(), move.getY());
 			int[][] microboard = new int[3][3];
 			for (int i = 0; i < microboard.length; i++){
 				for (int j = 0; j < microboard[i].length; j++){
@@ -451,7 +422,7 @@ public class Field implements IGameState, IReusable{
 			if (newMacroField == null){
 				isEveryFieldAllowed = true;
 			} else {
-				if (isMicroboardFull(newMacroField.getX(), newMacroField.getY())){
+				if (isMicroboardFullOrWon(newMacroField.getX(), newMacroField.getY())){
 					isEveryFieldAllowed = true;
 				} else {
 					isEveryFieldAllowed = false;
@@ -463,7 +434,7 @@ public class Field implements IGameState, IReusable{
 				for (int j = 0; j < mMacroboard[i].length; j++){
 					if (isEveryFieldAllowed){//Is every Field allowed?
 						if (mMacroboard[i][j] == GlobalDefinitions.PLAYER_NEUTRAL_ID){
-							if (!isMicroboardFull(i, j)){
+							if (!isMicroboardFullOrWon(i, j)){
 								mMacroboard[i][j] = GlobalDefinitions.MACRO_FIELD_NEEDS_TO_BE_USED_ID;
 							}
 						}

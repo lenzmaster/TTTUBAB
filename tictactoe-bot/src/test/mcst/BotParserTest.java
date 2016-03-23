@@ -190,7 +190,8 @@ public class BotParserTest {
 			}
 		}
 		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
-		testInstanceBot.getTree().print();
+		System.out.println("Old tree: ");
+		testInstanceBot.getTree().getOldRoot().printTree();
 	}
 	
 	/**
@@ -227,6 +228,7 @@ public class BotParserTest {
 			}
 		}
 		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
-		testInstanceBot.getTree().print();
+		System.out.println("Old tree: ");
+		testInstanceBot.getTree().getOldRoot().printTree();
 	}
 }

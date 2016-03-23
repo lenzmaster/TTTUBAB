@@ -1,4 +1,4 @@
-package bot.util;
+package bot.winningoption;
 
 import bot.Point;
 

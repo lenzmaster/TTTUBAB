@@ -6,6 +6,7 @@ import java.util.List;
 import bot.Move;
 import bot.Player;
 import bot.Player.PlayerTypes;
+import bot.actionrelatedcalculation.priorprobabilitycalculation.IPriorProbabilityCalculator;
 import bot.actionvaluecalculation.IActionValueCalculator;
 import bot.memory.IReusable;
 import bot.memory.ObjectManager;
@@ -14,6 +15,12 @@ import bot.nodeselectioncalculation.INodeSelectionValueCalculator;
 import bot.util.GlobalDefinitions;
 import bot.util.Logger;
 
+/**
+ * A node representing a gamestate and additional context and evaluation information.
+ * In case no takenAction is set, the previous gamestate will be interpreted as current gamestate.
+ * @author André
+ *
+ */
 public class MCSTNode implements IReusable{
 	
 	public static final float LAST_ACTION_VALUE_INITAL_VALUE = -1;
@@ -126,10 +133,24 @@ public class MCSTNode implements IReusable{
 		this.nodeLevel = nodeLevel;
 	}
 	
+	/**
+	 * This initalization method should not be used, since the prior probability
+	 * might be inefficiently calculated.
+	 * @param takenAction
+	 * @param previousGameState
+	 * @param nodeLevel
+	 */
 	public void initalize(IAction takenAction, IGameState previousGameState, int nodeLevel){
 		this.reset();
 		this.takenAction = takenAction;
 		this.priorProbability = GlobalDefinitions.getPriorProbabilityCalculator().calculate(previousGameState, takenAction);
+		this.nodeLevel = nodeLevel;
+	}
+	
+	public void initalize(IAction takenAction, IGameState previousGameState, int nodeLevel, float priorProbability){
+		this.reset();
+		this.takenAction = takenAction;
+		this.priorProbability = priorProbability;
 		this.nodeLevel = nodeLevel;
 	}
 	
@@ -161,10 +182,15 @@ public class MCSTNode implements IReusable{
 		if (getEvaluationValue() == GlobalDefinitions.NODE_EVALUATION_LOWER_BOUND){//Lower bound = loss
 			return;
 		}
-		List<IAction> allowedActions = getGameState().getAllowedActions();
-		for (IAction action : allowedActions) {
+		List<IAction> allowedActionsList = getGameState().getAllowedActions();
+		IPriorProbabilityCalculator priProCalculator = GlobalDefinitions.getPriorProbabilityCalculator();
+		IAction[] allowedActions = new IAction[allowedActionsList.size()];
+		allowedActionsList.toArray(allowedActions);
+		float[] priorProbabilities = priProCalculator.calculate(getGameState(), allowedActions);
+		for (int i = 0; i < allowedActions.length; i++) {
 			MCSTNode node = ObjectManager.getNewMCSTNode();
-			node.initalize(action, getGameState(), this.nodeLevel+1);
+			node.initalize(allowedActions[i], getGameState(), this.nodeLevel+1, 
+					priorProbabilities[i]);
 			this.childNodes.add(node);
 		}
 	}
@@ -218,6 +244,9 @@ public class MCSTNode implements IReusable{
 	
 	/**
 	 * Visits the node and thus executes one monte carlo iteration.
+	 * In case takenAction is not set the previousGameSate parameter will be interpreted as
+	 * current gamestate.
+	 * @param previousGameState the previous gamestate
 	 */
 	public void visitNode(IGameState previousGameState){
 		if(isLeaf()){
@@ -282,6 +311,12 @@ public class MCSTNode implements IReusable{
 			printRepresentationOfNode.append("; ");
 			printRepresentationOfNode.append("n.sel-value " + getNodeSelectionValue());
 		}
+		if (takenAction != null){
+			printRepresentationOfNode.append("; ");
+			printRepresentationOfNode.append("PriPro " + getPriorProbability());
+		}
+		printRepresentationOfNode.append("; ");
+		printRepresentationOfNode.append("eval-value " + getEvaluationValue());
 		printRepresentationOfNode.append("; ");
 		printRepresentationOfNode.append("visits " + getVisitCount());
 		

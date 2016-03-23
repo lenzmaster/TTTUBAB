@@ -7,6 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import bot.Field;
+import bot.FieldCalculationHelper;
 import bot.Move;
 import bot.Player;
 import bot.Player.PlayerTypes;
@@ -128,55 +129,55 @@ public class FieldTest {
 	public void testGetMacroIndex(){
 		//test field (0/0)
 		Move move = new Move(2, 2, Player.getPlayer(PlayerTypes.Self));
-		Point result = testFieldInstance.getMacroIndex(move);
+		Point result = FieldCalculationHelper.getMacroIndex(move.getX(), move.getY());
 		assertTrue("test field (0/0) X coordinate is " + result.getX(), result.getX() == 0);
 		assertTrue("test field (0/0) Y coordinate is " + result.getY(), result.getY() == 0);
 		
 		//test field (1/0)
 		move = new Move(3, 2, Player.getPlayer(PlayerTypes.Self));
-		result = testFieldInstance.getMacroIndex(move);
+		result = FieldCalculationHelper.getMacroIndex(move.getX(), move.getY());
 		assertTrue("test field (1/0) X coordinate is " + result.getX(), result.getX() == 1);
 		assertTrue("test field (1/0) Y coordinate is " + result.getY(), result.getY() == 0);
 		
 		//test field (2/0)
 		move = new Move(6, 2, Player.getPlayer(PlayerTypes.Self));
-		result = testFieldInstance.getMacroIndex(move);
+		result = FieldCalculationHelper.getMacroIndex(move.getX(), move.getY());
 		assertTrue("test field (2/0) X coordinate is " + result.getX(), result.getX() == 2);
 		assertTrue("test field (2/0) Y coordinate is " + result.getY(), result.getY() == 0);
 				
 		//test field (0/1)
 		move = new Move(2, 3, Player.getPlayer(PlayerTypes.Self));
-		result = testFieldInstance.getMacroIndex(move);
+		result = FieldCalculationHelper.getMacroIndex(move.getX(), move.getY());
 		assertTrue("test field (0/1) X coordinate is " + result.getX(), result.getX() == 0);
 		assertTrue("test field (0/1) Y coordinate is " + result.getY(), result.getY() == 1);
 		
 		//test field (1/1)
 		move = new Move(3, 3, Player.getPlayer(PlayerTypes.Self));
-		result = testFieldInstance.getMacroIndex(move);
+		result = FieldCalculationHelper.getMacroIndex(move.getX(), move.getY());
 		assertTrue("test field (1/1) X coordinate is " + result.getX(), result.getX() == 1);
 		assertTrue("test field (1/1) Y coordinate is " + result.getY(), result.getY() == 1);
 		
 		//test field (2/1)
 		move = new Move(6, 3, Player.getPlayer(PlayerTypes.Self));
-		result = testFieldInstance.getMacroIndex(move);
+		result = FieldCalculationHelper.getMacroIndex(move.getX(), move.getY());
 		assertTrue("test field (2/1) X coordinate is " + result.getX(), result.getX() == 2);
 		assertTrue("test field (2/1) Y coordinate is " + result.getY(), result.getY() == 1);
 		
 		//test field (0/2)
 		move = new Move(2, 6, Player.getPlayer(PlayerTypes.Self));
-		result = testFieldInstance.getMacroIndex(move);
+		result = FieldCalculationHelper.getMacroIndex(move.getX(), move.getY());
 		assertTrue("test field (0/2) X coordinate is " + result.getX(), result.getX() == 0);
 		assertTrue("test field (0/2) Y coordinate is " + result.getY(), result.getY() == 2);
 		
 		//test field (1/2)
 		move = new Move(5, 6, Player.getPlayer(PlayerTypes.Self));
-		result = testFieldInstance.getMacroIndex(move);
+		result = FieldCalculationHelper.getMacroIndex(move.getX(), move.getY());
 		assertTrue("test field (1/2) X coordinate is " + result.getX(), result.getX() == 1);
 		assertTrue("test field (1/2) Y coordinate is " + result.getY(), result.getY() == 2);
 		
 		//test field (2/2)
 		move = new Move(6, 6, Player.getPlayer(PlayerTypes.Self));
-		result = testFieldInstance.getMacroIndex(move);
+		result = FieldCalculationHelper.getMacroIndex(move.getX(), move.getY());
 		assertTrue("test field (2/2) X coordinate is " + result.getX(), result.getX() == 2);
 		assertTrue("test field (2/2) Y coordinate is " + result.getY(), result.getY() == 2);
 		

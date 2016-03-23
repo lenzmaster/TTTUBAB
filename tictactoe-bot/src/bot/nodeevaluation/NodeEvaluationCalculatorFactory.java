@@ -17,8 +17,12 @@ public class NodeEvaluationCalculatorFactory {
 	
 	public static INodeEvaluationValueCalculator createWinningOptionWithDiminishingReturnsOnlyCalculator(){
 		ConicalCombinationEvaluationValueCalculator calculator = new ConicalCombinationEvaluationValueCalculator();
-		calculator.addFunction(1, new WinningOptionEvaluationFunctionWithDiminishingReturns());
+		calculator.addFunction(1, new WinningOptionWithDiminishingReturnsEvaluationValueCalculator());
 		return calculator;
+	}
+	
+	public static INodeEvaluationValueCalculator createPriProNodeEvaluationCalculator(){
+		return new PriProNodeEvaluationValueCalculator();
 	}
 	
 }

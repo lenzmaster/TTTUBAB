@@ -1,5 +1,9 @@
 package bot.util;
 
+import bot.actionrelatedcalculation.WinningOptionWithDiminishingReturnsActionValueCalculator;
+import bot.actionrelatedcalculation.priorprobabilitycalculation.IPriorProbabilityCalculator;
+import bot.actionrelatedcalculation.priorprobabilitycalculation.RandomPriorProbabilityCalculator;
+import bot.actionrelatedcalculation.priorprobabilitycalculation.WinningOptWithDimReturnPriorProbabilityCalculator;
 import bot.actionvaluecalculation.FirstActionValueCalculator;
 import bot.actionvaluecalculation.IActionValueCalculator;
 import bot.nodeevaluation.ConicalCombinationEvaluationValueCalculator;
@@ -9,8 +13,6 @@ import bot.nodeevaluation.MacroStrategyEvaluationFunction;
 import bot.nodeevaluation.NodeEvaluationCalculatorFactory;
 import bot.nodeselectioncalculation.FirstNodeSelectionValueCalculator;
 import bot.nodeselectioncalculation.INodeSelectionValueCalculator;
-import bot.priorprobabilitycalculation.IPriorProbabilityCalculator;
-import bot.priorprobabilitycalculation.RandomPriorProbabilityCalculator;
 
 
 public class GlobalDefinitions {
@@ -42,6 +44,12 @@ public class GlobalDefinitions {
 	public static final float ACTION_VALUE_UPPER_BOUND = 1.0f;
 	public static final float ACTION_VALUE_NEUTRAL_VALUE = 0.5f;
 	
+	//Simulation constants
+	//Neutral element needs to be in the middle of the lower and upper bound
+	public static final float SIMULATION_REWARD_VALUE_LOWER_BOUND = 0.0f;
+	public static final float SIMULATION_REWARD_VALUE_UPPER_BOUND = 1.0f;
+	public static final float SIMULATION_REWARD_VALUE_NEUTRAL_VALUE = 0.5f;
+	
 	//Memory constants
 	public static final int MANAGED_FIELDS_INITAL_CAPACITY = 500000;
 	public static final int MANAGED_MOVES_INITAL_CAPACITY = 500000;
@@ -53,7 +61,7 @@ public class GlobalDefinitions {
 	
 	public static IPriorProbabilityCalculator getPriorProbabilityCalculator(){
 		if (_probabilityCalculator == null){
-			_probabilityCalculator = new RandomPriorProbabilityCalculator();
+			_probabilityCalculator = new WinningOptWithDimReturnPriorProbabilityCalculator();
 		}
 		return _probabilityCalculator;
 	}
@@ -75,7 +83,7 @@ public class GlobalDefinitions {
 	
 	public static INodeEvaluationValueCalculator getNodeEvaluationCalculator(){
 		if (_nodeEvaluationCalculator == null){
-			_nodeEvaluationCalculator = NodeEvaluationCalculatorFactory.createWinningOptionWithDiminishingReturnsOnlyCalculator();
+			_nodeEvaluationCalculator = NodeEvaluationCalculatorFactory.createPriProNodeEvaluationCalculator();
 		}
 		return _nodeEvaluationCalculator;
 	}

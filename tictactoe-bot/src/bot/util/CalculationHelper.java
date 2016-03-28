@@ -7,15 +7,16 @@ import bot.winningoption.WinningOptions;
 public class CalculationHelper {
 
 	public static float invertActionValue(float actionValue){
-		float differenceToNeutralActionValue = GlobalDefinitions.ACTION_VALUE_NEUTRAL_VALUE - actionValue;
-		return GlobalDefinitions.ACTION_VALUE_NEUTRAL_VALUE + differenceToNeutralActionValue;
-		
+		return invertValue(actionValue, GlobalDefinitions.ACTION_VALUE_NEUTRAL_VALUE);
 	}
 	
 	public static float invertNodeEvaluationValue(float nodeEvaluationValue){
-		float differenceToNeutralNodeEvaluationValue = GlobalDefinitions.NODE_EVALUATION_NEUTRAL_VALUE - nodeEvaluationValue;
-		return GlobalDefinitions.NODE_EVALUATION_NEUTRAL_VALUE + differenceToNeutralNodeEvaluationValue;
-		
+		return invertValue(nodeEvaluationValue, GlobalDefinitions.NODE_EVALUATION_NEUTRAL_VALUE);	
+	}
+	
+	public static float invertValue(float value, float neutralValue){
+		float differenceToNeutralValue = neutralValue - value;
+		return neutralValue + differenceToNeutralValue;
 	}
 	
 	public static float[] createDiminishingReturnFactors(float diminishingBaseFactor, float diminishingFactorsThreshold){

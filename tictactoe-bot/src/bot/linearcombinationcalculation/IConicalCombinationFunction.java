@@ -1,12 +1,12 @@
 package bot.linearcombinationcalculation;
 
-import bot.mcst.IGameState;
+import bot.mcst.MCSTNode;
 
 public interface IConicalCombinationFunction {
 
-	public void setGameState(IGameState gameState);
+	public void setCurrentNode(MCSTNode node);
 	
-	public IGameState getGameState();
+	public MCSTNode getCurrentNode();
 	
 	public float calculate();
 	

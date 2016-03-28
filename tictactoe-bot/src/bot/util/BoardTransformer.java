@@ -1,8 +1,5 @@
 package bot.util;
 
-import java.awt.image.TileObserver;
-
-import bot.Field;
 import bot.Player;
 import bot.Player.PlayerTypes;
 
@@ -11,6 +8,18 @@ public class BoardTransformer {
 	private float lowerBound;
 	private float upperBound;
 	private float notOccupiedValue;
+	
+	public float getLowerBound(){
+		return lowerBound;
+	}
+	
+	public float getUpperBound(){
+		return upperBound;
+	}
+	
+	public float getNotOccupiedValue(){
+		return notOccupiedValue;
+	}
 	
 	public BoardTransformer(float lowerBound, float upperBound, float notOccupiedValue){
 		this.lowerBound = lowerBound;
@@ -79,10 +88,10 @@ public class BoardTransformer {
 	 * @return transformed tile to the defined scale
 	 */
 	public float transform(int tile, Player player){
-		if (player.getPlayerType() == PlayerTypes.None) throw new IllegalArgumentException("PlayerType none is not allowed for this method");
+		Player none = Player.getPlayer(PlayerTypes.None);
+		if (player.getPlayerType() == none.getPlayerType()) throw new IllegalArgumentException("PlayerType none is not allowed for this method");
 		
 		Player opponent = Player.getInvertedPlayer(player);
-		Player none = Player.getPlayer(PlayerTypes.None);
 		float transformedTile;
 		if (tile == player.getId()){
 			transformedTile = upperBound;

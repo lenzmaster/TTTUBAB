@@ -3,11 +3,11 @@ package bot.linearcombinationcalculation;
 import java.util.ArrayList;
 import java.util.List;
 
-import bot.mcst.IGameState;
+import bot.mcst.MCSTNode;
 
 public class ConicalCombinationAbstract implements IConicalCombination{
 
-	private IGameState gameState;
+	private MCSTNode node;
 	
 	private List<IConicalCombinationFunction> functions = new ArrayList<IConicalCombinationFunction>();
 	private List<Integer> weights = new ArrayList<Integer>();
@@ -15,16 +15,16 @@ public class ConicalCombinationAbstract implements IConicalCombination{
 	private int functionsCount = 0;
 	
 	@Override
-	public void setGameState(IGameState gameState){
-		this.gameState = gameState;
+	public void setCurrentNode(MCSTNode node){
+		this.node = node;
 		for (IConicalCombinationFunction func : functions) {
-			func.setGameState(gameState);
+			func.setCurrentNode(node);
 		}
 	}
 	
 	@Override
-	public IGameState getGameState(){
-		return gameState;
+	public MCSTNode getCurrentNode(){
+		return node;
 	}
 	
 

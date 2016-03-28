@@ -22,7 +22,7 @@ import bot.memory.IReusable;
 
 /**
  * Move class
- * 
+ * A move object should not be changed after its initialization.
  * Stores a move.
  * 
  * @author Jim van Eeden <jim@starapple.nl>, Joost de Meij <joost@starapple.nl>
@@ -31,7 +31,6 @@ import bot.memory.IReusable;
 public class Move implements IAction, IReusable{
 	private int x, y;
 	private Player player;
-	
 	
 	
 	public Move() {

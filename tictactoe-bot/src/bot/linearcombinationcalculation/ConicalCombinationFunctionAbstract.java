@@ -1,19 +1,19 @@
 package bot.linearcombinationcalculation;
 
-import bot.mcst.IGameState;
+import bot.mcst.MCSTNode;
 
 public abstract class ConicalCombinationFunctionAbstract implements IConicalCombinationFunction{
 
-	private IGameState gameState;
+	private MCSTNode node;
 	
 	@Override
-	public void setGameState(IGameState gameState){
-		this.gameState = gameState;
+	public void setCurrentNode(MCSTNode node){
+		this.node = node;
 	}
 	
 	@Override
-	public IGameState getGameState(){
-		return gameState;
+	public MCSTNode getCurrentNode(){
+		return node;
 	}
 	
 }

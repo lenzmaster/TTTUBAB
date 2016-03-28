@@ -217,7 +217,7 @@ public class WinningOptionEvaluationFunction extends ConicalCombinationFunctionA
 	
 	@Override
 	public float calculate() {
-		Field field = (Field) getGameState();
+		Field field = (Field) getCurrentNode().getGameState();
 		int[][] untransformedBoard = field.getCopyOfBoard();
 		float[][] transformedBoardSelf = transformBoard(untransformedBoard, this.getSelf());
 		float[][] macroBoardSelf = new float[3][3];

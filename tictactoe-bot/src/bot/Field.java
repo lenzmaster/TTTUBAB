@@ -49,6 +49,11 @@ public class Field implements IGameState, IReusable{
 		private int[][] mBoard;
 		private int[][] mMacroboard;
 		private Player playerAtTurn;
+		private boolean isEndState = false;
+		private boolean endStateAlreadyCalculated = false;
+		
+		//Observers of the field
+		private List<IFieldObserver> observers = new ArrayList<IFieldObserver>();
 		
 		public void setPlayerAtTurn(Player player){
 			this.playerAtTurn = player;
@@ -65,6 +70,20 @@ public class Field implements IGameState, IReusable{
 		
 		public int getMoveNr(){
 			return mMoveNr;
+		}
+		
+		public void addObserver(IFieldObserver observer){
+			this.observers.add(observer);
+		}
+		
+		public void removeObserver(IFieldObserver observer){
+			observers.remove(observer);
+		}
+		
+		public IFieldObserver[] getObservers(){
+			IFieldObserver[] result = new IFieldObserver[observers.size()];
+			observers.toArray(result);
+			return result;
 		}
 		
 		public int[][] getCopyOfBoard(){
@@ -93,6 +112,10 @@ public class Field implements IGameState, IReusable{
 			return FieldCalculationHelper.copyBoard(mMacroboard);
 		}
 		
+		public int getTile(int x, int y){
+			return mBoard[x][y];
+		}
+		
 		public Field() {
 			mBoard = new int[COLS][ROWS];
 			mMacroboard = new int[COLS / 3][ROWS / 3];
@@ -110,9 +133,14 @@ public class Field implements IGameState, IReusable{
 			clearBoard();
 			clearMacroboard();
 			playerAtTurn = null;
+			endStateAlreadyCalculated = false;
 		}
 
-		private Field copy(){
+		/**
+		 * Clones the field except its observer.
+		 */
+		@Override
+		public Field clone(){
 			Field copy = ObjectManager.getNewField();
 			copy.mRoundNr = this.mRoundNr;
 			copy.mMoveNr = this.mMoveNr;
@@ -127,9 +155,23 @@ public class Field implements IGameState, IReusable{
 				}
 			}
 			copy.playerAtTurn = this.playerAtTurn;
+			copy.isEndState = this.isEndState;
+			copy.endStateAlreadyCalculated = this.endStateAlreadyCalculated;
 			
 			return copy;
 			
+		}
+		
+		/**
+		 * Returns a copy of the field including a copy of its observers.
+		 * @return
+		 */
+		public Field cloneWithObservers(){
+			Field copy = clone();
+			for (IFieldObserver observer : observers) {
+				copy.addObserver(observer.clone());
+			}
+			return copy;
 		}
 		
 		//ToDo: Implement the method and its usage more efficiently
@@ -327,17 +369,34 @@ public class Field implements IGameState, IReusable{
 		}
 		
 		/**
-		 * Checks whether the field is full
-		 * @param args : 
-		 * @return : Returns true when field is full, otherwise returns false.
+		 * Checks whether the field is in an end state (win or tie)
+		 * @return : Returns true when the field is in an end state, otherwise returns false.
 		 */
-		public boolean isFull() {
-			for (int x = 0; x < COLS; x++)
-			  for (int y = 0; y < ROWS; y++)
-			    if (mBoard[x][y] == 0)
-			      return false; // At least one cell is not filled
-			// All cells are filled
-			return true;
+		public boolean isEndState() {
+			if (!endStateAlreadyCalculated){
+				//Check, if field won
+				if (this.getWinner() == Player.getPlayer(PlayerTypes.None)){
+					//Field not won
+					//Check each microboard, if it is full or won
+					for (int i = 0; i < MACROCOLS; i++){
+						for (int j = 0; j < MACROROWS; j++){
+							if (!isMicroboardFullOrWon(i, j)){
+								this.isEndState = false;
+								this.endStateAlreadyCalculated = true;
+								return isEndState;
+							}
+						}
+					}
+					//every microboard is won or full --> end state reached
+					this.isEndState = true;
+					this.endStateAlreadyCalculated = true;
+				} else {
+					//Field won
+					this.isEndState = true;
+					this.endStateAlreadyCalculated = true;
+				}
+			}
+			return this.isEndState;
 		}
 		
 		public int getNrColumns() {
@@ -369,14 +428,15 @@ public class Field implements IGameState, IReusable{
 		}
 		
 		/**
-		 * Simulates the given move and returns a new Field object with the new game state.
+		 * Simulates the given move with the field.
 		 * @param move the move to simulate
 		 * @return the resulting field
 		 */
-		public Field simulateMove(Move move){
-			Field newField = this.copy();
-			newField.executeMove(move);
-			return newField;
+		public void simulateMove(Move move){
+			this.executeMove(move);
+			for (IFieldObserver observer : this.observers) {
+				observer.moveExecuted(this, move);
+			}
 		}
 
 		
@@ -391,12 +451,12 @@ public class Field implements IGameState, IReusable{
 		}
 
 		@Override
-		public IGameState simulateAction(IAction action) {
+		public void simulateAction(IAction action) {
 			if (!(action instanceof Move)) {
 				throw new IllegalArgumentException("Action not of type Move");
 			}
 			Move move = (Move) action;
-			return simulateMove(move);
+			this.simulateMove(move);
 		}
 		
 		public void executeMove(Move move){
@@ -456,6 +516,9 @@ public class Field implements IGameState, IReusable{
 			if(mMoveNr % 2 == 1){
 				mRoundNr++;
 			}
+			
+			//Ensure that the end state calculation is reseted.
+			this.endStateAlreadyCalculated = false;
 		}
 		
 		/**

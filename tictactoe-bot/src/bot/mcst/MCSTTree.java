@@ -101,8 +101,13 @@ public class MCSTTree implements IReusable{
 		return this.getRoot().getSubTreeDepth();
 	}
 	
-	public void print(){
+	/**
+	 * Prints the tree to the given tree depth.
+	 * if the tree depth is -1 the whole tree is printed.
+	 * @param treeDepth
+	 */
+	public void print(int treeDepth){
 		System.out.println("Tree: ");
-		root.printTree();
+		root.printTree(treeDepth);
 	}
 }

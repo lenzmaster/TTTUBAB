@@ -8,6 +8,9 @@ import bot.Point;
 import bot.Player.PlayerTypes;
 import bot.util.CalculationHelper;
 
+
+//TODO: Check, if the class uses the upper and lower bound properly --> some calculations might be normed to [0;1]
+//Multiplications with the upper or lower bound might be missing
 public class DiminishingReturnWinningOptionsAggregationScoreCalculator {
 
 	private float lowerBound;
@@ -18,6 +21,8 @@ public class DiminishingReturnWinningOptionsAggregationScoreCalculator {
 	private float diminishingBaseFactor;
 	private float diminishingFactorsThreshold;
 	private float[] diminishingReturnFactors = null;
+	
+	private float denominator;
 	
 	private Player none = null;
 	
@@ -42,6 +47,25 @@ public class DiminishingReturnWinningOptionsAggregationScoreCalculator {
 		this.diminishingBaseFactor = diminishingBaseFactor;
 		this.diminishingFactorsThreshold = diminishingFactorsThreshold;
 		this.diminishingReturnFactors = CalculationHelper.createDiminishingReturnFactors(diminishingBaseFactor, diminishingFactorsThreshold);
+		this.initalizeDenominator(diminishingReturnFactors, winningOptionScoreCalculator);
+	}
+	
+	/**
+	 * Initializes the denominator. This should be done in the constructor.
+	 * @param factors an array of the diminishing return factors
+	 * @param winOptScoreCalculator
+	 */
+	private void initalizeDenominator(float[] factors , IWinningOptionScoreCalculator winOptScoreCalculator){
+		//Sum up the diminishing return factors
+//		float sumOfFactors = 0;
+//		for (int i = 0; i < factors.length; i++){
+//			sumOfFactors += factors[i];
+//		}
+		//Get the maximum value that a single winning option score can have
+		float maxSingleScoreValue = winOptScoreCalculator.getMaxIntermediateValue();
+		//This is the max achievable value --> using this as denominator will keep the result in the upper and lower bound
+		//TODO: this value sucks --> find a solution that does not make the denominator that big
+		this.denominator = maxSingleScoreValue; //sumOfFactors * maxSingleScoreValue;
 	}
 	
 	/**
@@ -118,8 +142,8 @@ public class DiminishingReturnWinningOptionsAggregationScoreCalculator {
 			scores[1] = lowerBound;//lower bound, because opponent lost board
 		} else {
 			//Board won by opponent
-			scores[0] = lowerBound;// upper bound, because one lost that board
-			scores[1] = upperBound;//lower bound, because opponent won board
+			scores[0] = lowerBound;// lower bound, because one lost that board
+			scores[1] = upperBound;//upper bound, because opponent won board
 		}
 		return scores;
 	}
@@ -127,7 +151,7 @@ public class DiminishingReturnWinningOptionsAggregationScoreCalculator {
 	/**
 	 * Calculates a board score based on the board´s winning options scores.
 	 * The following formula is used:
-	 * board score = sum(dimishingFactor^0 * s1 + dimishingFactor^1 * s2 + ...) / potencyBasis^4
+	 * board score = sum(dimishingFactor^0 * s1 + dimishingFactor^1 * s2 + ...) / (potencyBasis^4 * sumOfDiminishingFactors)
 	 * where the winningOptionScores s1...sn are ordered descendingly
 	 * @param winningOptionsScores
 	 * @return
@@ -149,7 +173,6 @@ public class DiminishingReturnWinningOptionsAggregationScoreCalculator {
 		}
 		
 		//Calculate final score
-		float denominator = winningOptionScoreCalculator.getMaxIntermediateValue();
 		float boardScore = weightedWinningOptionScoreSum / denominator;
 		return boardScore;
 	}

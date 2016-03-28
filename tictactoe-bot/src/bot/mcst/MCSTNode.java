@@ -134,7 +134,7 @@ public class MCSTNode implements IReusable{
 	}
 	
 	/**
-	 * This initalization method should not be used, since the prior probability
+	 * This initialization method should not be used, since the prior probability
 	 * might be inefficiently calculated.
 	 * @param takenAction
 	 * @param previousGameState
@@ -147,6 +147,13 @@ public class MCSTNode implements IReusable{
 		this.nodeLevel = nodeLevel;
 	}
 	
+	/**
+	 * Initializes the object
+	 * @param takenAction
+	 * @param previousGameState
+	 * @param nodeLevel
+	 * @param priorProbability
+	 */
 	public void initalize(IAction takenAction, IGameState previousGameState, int nodeLevel, float priorProbability){
 		this.reset();
 		this.takenAction = takenAction;
@@ -173,7 +180,8 @@ public class MCSTNode implements IReusable{
 		if (takenAction == null){//root --> no action need to be taken
 			this.gameState = previousGameState;
 		} else {//action need to be simulated to get new game state
-			this.gameState = previousGameState.simulateAction(takenAction);
+			this.gameState = previousGameState.clone();
+			this.gameState.simulateAction(takenAction);
 		}
 		evaluateNode();
 		if (getEvaluationValue() == GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND){//Upper bound = win
@@ -295,7 +303,15 @@ public class MCSTNode implements IReusable{
 		return currentlyMostVisitedNode.getTakenAction();
 	}
 	
-	public void printTree(){
+	/**
+	 * Prints the sub tree to the given tree depth.
+	 * if the tree depth is -1 the whole sub tree is printed.
+	 * @param treeDepth
+	 */
+	public void printTree(int treeDepth){
+		if (treeDepth != -1 && treeDepth < this.nodeLevel){
+			return;
+		}
 		StringBuilder printRepresentationOfNode = new StringBuilder();
 		for (int i = 0; i < nodeLevel; i++){
 			printRepresentationOfNode.append(" ");
@@ -322,7 +338,7 @@ public class MCSTNode implements IReusable{
 		
 		System.out.println(printRepresentationOfNode.toString());
 		for (MCSTNode mcstNode : childNodes) {
-			mcstNode.printTree();
+			mcstNode.printTree(treeDepth);
 		}
 	}
 }

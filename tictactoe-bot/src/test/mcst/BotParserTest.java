@@ -82,6 +82,7 @@ public class BotParserTest {
 		}
 	}
 	
+	//TODO: Look into this test and figure out why the bot takes an action with an action value below 0.5
 	/**
 	 * Test field:
 	 * 	0|0|0|0|0|0|0|0|0
@@ -114,6 +115,8 @@ public class BotParserTest {
 			}
 		}
 		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
+		System.out.println("Old tree: ");
+		testInstanceBot.getTree().getOldRoot().printTree(1);
 		
 		
 	}
@@ -191,7 +194,7 @@ public class BotParserTest {
 		}
 		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
 		System.out.println("Old tree: ");
-		testInstanceBot.getTree().getOldRoot().printTree();
+		testInstanceBot.getTree().getOldRoot().printTree(-1);
 	}
 	
 	/**
@@ -229,6 +232,6 @@ public class BotParserTest {
 		}
 		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
 		System.out.println("Old tree: ");
-		testInstanceBot.getTree().getOldRoot().printTree();
+		testInstanceBot.getTree().getOldRoot().printTree(-1);
 	}
 }

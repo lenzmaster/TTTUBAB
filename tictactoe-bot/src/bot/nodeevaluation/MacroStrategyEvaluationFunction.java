@@ -45,7 +45,7 @@ public class MacroStrategyEvaluationFunction extends ConicalCombinationFunctionA
 	}
 	
 	public float calculate(){
-		Field field = (Field) getGameState();
+		Field field = (Field) getCurrentNode().getGameState();
 		int[][] board = field.getCopyOfBoard();
 		float scoreOfWonAndLostMacroboards = GlobalDefinitions.NODE_EVALUATION_NEUTRAL_VALUE;
 		//Check winner in different microboards

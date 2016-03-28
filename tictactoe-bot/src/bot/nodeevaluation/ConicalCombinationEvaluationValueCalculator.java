@@ -24,13 +24,20 @@ public class ConicalCombinationEvaluationValueCalculator extends ConicalCombinat
 	
 	@Override
 	public float calculate(MCSTNode node) {
-		this.setGameState(node.getGameState());
-		Field field = (Field) this.getGameState();
-		//Check, if someone already won
-		if (field.getWinner() == Player.getPlayer(PlayerTypes.Self)){
-			return GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND;
-		} else if (field.getWinner() == Player.getPlayer(PlayerTypes.Opponent)) {
-			return GlobalDefinitions.NODE_EVALUATION_LOWER_BOUND;
+		this.setCurrentNode(node);
+		Field field = (Field) this.getCurrentNode().getGameState();
+		//Check, if board is in game ending state
+		if (field.isEndState()){
+			//Check, if someone won
+			Player winner = field.getWinner();
+			if (winner == Player.getPlayer(PlayerTypes.Self)){
+				return GlobalDefinitions.NODE_EVALUATION_UPPER_BOUND;
+			} else if (winner == Player.getPlayer(PlayerTypes.Opponent)) {
+				return GlobalDefinitions.NODE_EVALUATION_LOWER_BOUND;
+			} else {
+				//It´s a tie
+				return GlobalDefinitions.NODE_EVALUATION_NEUTRAL_VALUE;
+			}
 		}
 		//Calculate the conical combination
 		float result = super.calculate();

@@ -94,38 +94,28 @@ public class WinningOptionWithDiminishingReturnsScoreCalculator{
 		this.boardTransformer = new BoardTransformer(lowerBound, upperBound, notOccupiedValue);
 	}
 	
-	private int[][] getMicroboard(int[][] untransformedBoard, int macroX, int macroY){
-		int[][] microboard = new int[3][3];
-		for (int k = 0; k < microboard.length; k++){
-			for (int l = 0; l < microboard[k].length; l++){
-				microboard[k][l] = untransformedBoard[macroX*3+k][macroY*3+l];
-			}
-		}
-		return microboard;
-	}
-	
 	private float calcTotalBoardScore(float macroBoardScoreSelf, float macroBoardScoreOpponent)
 	{
-		//3.Aggregate both macroboard scores to one score --> node evaluation score
-				//Invert node evaluation value of opponent
-				float scoreDifferenceOfPlayers = macroBoardScoreSelf - macroBoardScoreOpponent;
-				//Compute scores
-				float normedScoreDifference = scoreDifferenceOfPlayers / 2;
-				float maxDifferenceBetweenNeutralElementAndBounds = upperBound - neutralValue;
-				if (normedScoreDifference > maxDifferenceBetweenNeutralElementAndBounds
-						|| normedScoreDifference < -maxDifferenceBetweenNeutralElementAndBounds){
-					LOGGER.log("Absolute normed score difference is above "+ 
-						maxDifferenceBetweenNeutralElementAndBounds + ": " + normedScoreDifference);
-					if (normedScoreDifference > maxDifferenceBetweenNeutralElementAndBounds){
-						normedScoreDifference = maxDifferenceBetweenNeutralElementAndBounds - 0.01f;
-					} else {
-						normedScoreDifference = -maxDifferenceBetweenNeutralElementAndBounds + 0.01f;
-					}
-				}
-				
-				float totalBoardScore = neutralValue + 
-						normedScoreDifference;
-				return totalBoardScore;
+		//Aggregate both macroboard scores to one score
+		float scoreDifferenceOfPlayers = macroBoardScoreSelf - macroBoardScoreOpponent;
+		//Compute score
+		float normedScoreDifference = scoreDifferenceOfPlayers / 2;
+		float maxDifferenceBetweenNeutralElementAndBounds = upperBound - neutralValue;
+		if (normedScoreDifference > maxDifferenceBetweenNeutralElementAndBounds
+				|| normedScoreDifference < -maxDifferenceBetweenNeutralElementAndBounds){
+			LOGGER.log("Absolute normed score difference is above "+ 
+				maxDifferenceBetweenNeutralElementAndBounds + ": " + normedScoreDifference);
+			LOGGER.log("The board values for both players(self ;opponent) are: " + macroBoardScoreSelf + "; "
+					+ macroBoardScoreOpponent);
+			if (normedScoreDifference > maxDifferenceBetweenNeutralElementAndBounds){
+				normedScoreDifference = maxDifferenceBetweenNeutralElementAndBounds - 0.01f;
+			} else {
+				normedScoreDifference = -maxDifferenceBetweenNeutralElementAndBounds + 0.01f;
+			}
+		}
+		
+		float totalBoardScore = neutralValue + normedScoreDifference;
+		return totalBoardScore;
 	}
 	
 	/**
@@ -171,13 +161,13 @@ public class WinningOptionWithDiminishingReturnsScoreCalculator{
 	 * For each move a score is calculated.
 	 * The order of the result is the same order as the actions.
 	 * This method uses caches intermediate results to increase efficiency.
-	 * If possibleActionsAfterGameState is null the score of the game state is returned.
+	 * If possibleActionsAfterGameState is null or its length zero the score of the game state is returned.
 	 * @param gameState
 	 * @param possibleActionsAfterGameState the actions that can be performed at the given game state
 	 * @return
 	 */
 	public float[] calculate(IGameState gameState, IAction[] possibleActionsAfterGameState) {
-		if (possibleActionsAfterGameState == null){
+		if (possibleActionsAfterGameState == null || possibleActionsAfterGameState.length == 0){
 			float[] resultScores = new float[1];
 			resultScores[0] = calculate(gameState);
 			return resultScores;
@@ -264,8 +254,8 @@ public class WinningOptionWithDiminishingReturnsScoreCalculator{
 		
 		//2. Calculate new macroboard scores
 		float[] changedMacroboardScores = winningOptionAggScoreCalculator.calculateScore(
-				changedMacroboardSelf, changedMicroboardOpponent);
-		return calcTotalBoardScore(changedMacroboardScores[0], changedMacroboardScores[1]);
+				changedMacroboardSelf, changedMacroboardOpponent);
+		return this.calcTotalBoardScore(changedMacroboardScores[0], changedMacroboardScores[1]);
 		
 	}
 	

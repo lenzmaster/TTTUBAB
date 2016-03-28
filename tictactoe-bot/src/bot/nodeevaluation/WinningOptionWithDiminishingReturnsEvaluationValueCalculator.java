@@ -53,6 +53,6 @@ public class WinningOptionWithDiminishingReturnsEvaluationValueCalculator extend
 	
 	@Override
 	public float calculate() {
-		return calculator.calculate(getGameState());
+		return calculator.calculate(getCurrentNode().getGameState());
 	}
 }

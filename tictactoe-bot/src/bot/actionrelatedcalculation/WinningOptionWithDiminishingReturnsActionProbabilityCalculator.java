@@ -1,10 +1,14 @@
 package bot.actionrelatedcalculation;
 
+import bot.Field;
+import bot.Player;
+import bot.Player.PlayerTypes;
 import bot.mcst.IAction;
 import bot.mcst.IGameState;
+import bot.util.CalculationHelper;
 import bot.winningoption.WinningOptionWithDiminishingReturnsScoreCalculator;
 
-public class WinningOptionWithDiminishingReturnsActionValueCalculator implements IActionCalculator {
+public class WinningOptionWithDiminishingReturnsActionProbabilityCalculator implements IActionCalculator {
 	
 	private int potencyBasis;
 	private float diminishingBaseFactor;
@@ -17,7 +21,7 @@ public class WinningOptionWithDiminishingReturnsActionValueCalculator implements
 	private WinningOptionWithDiminishingReturnsScoreCalculator calculator = null;
 	
 
-	public WinningOptionWithDiminishingReturnsActionValueCalculator(
+	public WinningOptionWithDiminishingReturnsActionProbabilityCalculator(
 			int potencyBasis, float diminishingBaseFactor, float diminishingFactorsThreshold,
 			float lowerBound, float upperBound, float neutralValue,
 			float notOccupiedValue){
@@ -45,10 +49,20 @@ public class WinningOptionWithDiminishingReturnsActionValueCalculator implements
 
 	@Override
 	public float[] calculate(IGameState oldGameState, IAction[] actions) {
+		float[] result;
 		if (actions.length == 0){
-			return this.calculator.calculate(oldGameState, null);
+			result = this.calculator.calculate(oldGameState, null);
+		} else {
+			result = this.calculator.calculate(oldGameState, actions);
 		}
-		return this.calculator.calculate(oldGameState, actions);
+		//Invert values if opponent is at turn, since the calculated value is not universally valid
+		Field fieldOld = (Field) oldGameState;
+		if (fieldOld.getPlayerAtTurn() == Player.getPlayer(PlayerTypes.Opponent)){
+			for (int i = 0; i < result.length; i++){
+				result[i] = CalculationHelper.invertValue(result[i], neutralValue);
+			}
+		}
+		return result;
 	}
 
 }

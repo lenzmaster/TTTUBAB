@@ -1,9 +1,9 @@
 package bot.actionrelatedcalculation.priorprobabilitycalculation;
 
-import bot.actionrelatedcalculation.WinningOptionWithDiminishingReturnsActionValueCalculator;
+import bot.actionrelatedcalculation.WinningOptionWithDiminishingReturnsActionProbabilityCalculator;
 import bot.util.GlobalDefinitions;
 
-public class WinningOptWithDimReturnPriorProbabilityCalculator extends WinningOptionWithDiminishingReturnsActionValueCalculator
+public class WinningOptWithDimReturnPriorProbabilityCalculator extends WinningOptionWithDiminishingReturnsActionProbabilityCalculator
 														implements IPriorProbabilityCalculator{
 	
 	private static int potencyBasis = 3;

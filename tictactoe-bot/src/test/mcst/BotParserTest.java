@@ -234,4 +234,42 @@ public class BotParserTest {
 		System.out.println("Old tree: ");
 		testInstanceBot.getTree().getOldRoot().printTree(-1);
 	}
+	
+	/**
+	 * Test field:
+	 * 	0|2|0|1|2|0|0|0|2
+		0|0|0|2|2|1|1|1|1
+		2|2|2|0|1|1|2|0|0
+		0|0|0|1|2|2|1|1|2
+		0|0|0|2|1|1|0|2|2
+		1|1|1|2|1|2|2|2|0
+		0|0|1|0|1|0|1|2|1
+		0|0|1|0|1|2|2|2|1
+		0|2|1|0|1|0|0|0|2
+		
+	 * fields to play in: (1/0), (2/2)
+	 */
+	@Test
+	public void testTieSituation() {
+		sendGameSettings();
+
+		List<String> commands = new ArrayList<String>();
+		commands.add("update game round 26");
+		commands.add("update game move 51");
+		commands.add("update game field 0,2,0,1,2,0,0,0,2,0,0,0,2,2,1,1,1,1,2,2,2,0,1,1,2,0,0,0,0,0,1,2,2,1,1,2,0,0,0,2,1,1,0,2,2,1,1,1,2,1,2,2,2,0,0,0,1,0,1,0,1,2,1,0,0,1,0,1,2,2,2,1,0,2,1,0,1,0,0,0,2");
+		commands.add("update game macroboard 2,-1,1,1,0,2,1,1,-1");
+		commands.add("action move 10000");
+		//commands.add("exit");
+		List<String> results = new ArrayList<String>();
+		for (String command : commands) {
+			String result = testInstanceParser.parseCommand(command);
+			results.add(result);
+			if (result != null){
+				System.out.println(result);
+			}
+		}
+		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
+		System.out.println("Old tree: ");
+		testInstanceBot.getTree().getOldRoot().printTree(-1);
+	}
 }

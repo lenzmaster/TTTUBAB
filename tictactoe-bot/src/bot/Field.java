@@ -368,6 +368,32 @@ public class Field implements IGameState, IReusable{
 			}
 		}
 		
+		@Override
+		public void logGameState(){
+			for (int y = 0; y < ROWS; y++) {
+				String line = "";
+				for (int x = 0; x < COLS; x++) {
+					if (x > 0) {
+						line += "|";
+					}
+					line += mBoard[x][y];
+				}
+				LOGGER.log(line);
+			}
+			
+			LOGGER.log("Macroboard:");
+			for (int y = 0; y < MACROROWS; y++) {
+				String line = "";
+				for (int x = 0; x < MACROCOLS; x++) {
+					if (x > 0) {
+						line += "|";
+					}
+					line += mMacroboard[x][y];
+				}
+				LOGGER.log(line);
+			}
+		}
+		
 		/**
 		 * Checks whether the field is in an end state (win or tie)
 		 * @return : Returns true when the field is in an end state, otherwise returns false.

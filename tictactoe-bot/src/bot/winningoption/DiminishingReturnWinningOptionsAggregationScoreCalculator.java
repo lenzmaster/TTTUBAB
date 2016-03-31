@@ -94,17 +94,7 @@ public class DiminishingReturnWinningOptionsAggregationScoreCalculator {
 	public float[] calculateScore(float[][] transformedBoardSelf,
 							float[][] transformedBoardOpponent){
 		//Check, if winner already exists
-		float winnerValue = FieldCalculationHelper.getWinner(transformedBoardSelf, lowerBound, upperBound, notOccupiedValue);
-		Player winner;
-		if (winnerValue == notOccupiedValue){
-			winner = Player.getPlayer(PlayerTypes.None);
-		} else if (winnerValue == upperBound){
-			//Self won, since board of self was used
-			winner = Player.getPlayer(PlayerTypes.Self);
-		} else {
-			//Opponent won, since board of self was used and the result had to be lowerBound
-			winner = Player.getPlayer(PlayerTypes.Opponent);
-		}
+		Player winner = FieldCalculationHelper.getWinner(transformedBoardSelf, transformedBoardOpponent, upperBound);
 		return calculateScore(winner, transformedBoardSelf, transformedBoardOpponent);
 	}
 	

@@ -19,4 +19,6 @@ public interface IGameState {
 	
 	public IGameState clone();
 	
+	public void logGameState();
+	
 }

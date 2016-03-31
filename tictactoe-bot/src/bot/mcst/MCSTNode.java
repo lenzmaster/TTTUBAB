@@ -178,7 +178,7 @@ public class MCSTNode implements IReusable{
 
 	private void visitNodeFirstTime(IGameState previousGameState){
 		if (takenAction == null){//root --> no action need to be taken
-			this.gameState = previousGameState;
+			this.gameState = previousGameState.clone();
 		} else {//action need to be simulated to get new game state
 			this.gameState = previousGameState.clone();
 			this.gameState.simulateAction(takenAction);
@@ -191,10 +191,18 @@ public class MCSTNode implements IReusable{
 			return;
 		}
 		List<IAction> allowedActionsList = getGameState().getAllowedActions();
+//		if (allowedActionsList.isEmpty() || allowedActionsList.size() == 0){
+//			LOGGER.log("There were no allowed actions.");
+//			getGameState().logGameState();
+//		}
 		IPriorProbabilityCalculator priProCalculator = GlobalDefinitions.getPriorProbabilityCalculator();
 		IAction[] allowedActions = new IAction[allowedActionsList.size()];
 		allowedActionsList.toArray(allowedActions);
 		float[] priorProbabilities = priProCalculator.calculate(getGameState(), allowedActions);
+		//TODO: Check why the line below is never true
+		if (priorProbabilities == null || priorProbabilities.length == 0){
+			LOGGER.log("There  were no prior probabilities");
+		}
 		for (int i = 0; i < allowedActions.length; i++) {
 			MCSTNode node = ObjectManager.getNewMCSTNode();
 			node.initalize(allowedActions[i], getGameState(), this.nodeLevel+1, 
@@ -285,7 +293,13 @@ public class MCSTNode implements IReusable{
 	}
 	
 	public IAction getActionWithMostVisits(){
-		if (childNodes.isEmpty()) return null;
+		if (childNodes.isEmpty()) {
+			LOGGER.log("Node had no child nodes to select from.");
+			getGameState().logGameState();
+			LOGGER.log("Is end state? " + getGameState().isEndState());
+			logTree(-1);
+			return null;
+		}
 		
 		MCSTNode currentlyMostVisitedNode = childNodes.get(0);
 		for (int i = 1; i < childNodes.size(); i++) {
@@ -337,6 +351,40 @@ public class MCSTNode implements IReusable{
 		printRepresentationOfNode.append("visits " + getVisitCount());
 		
 		System.out.println(printRepresentationOfNode.toString());
+		for (MCSTNode mcstNode : childNodes) {
+			mcstNode.printTree(treeDepth);
+		}
+	}
+	
+	public void logTree(int treeDepth){
+		if (treeDepth != -1 && treeDepth < this.nodeLevel){
+			return;
+		}
+		StringBuilder printRepresentationOfNode = new StringBuilder();
+		for (int i = 0; i < nodeLevel; i++){
+			printRepresentationOfNode.append(" ");
+		}
+		printRepresentationOfNode.append(nodeLevel);
+		printRepresentationOfNode.append(": ");
+		if (takenAction != null){
+			printRepresentationOfNode.append(takenAction.toString());
+		}
+		printRepresentationOfNode.append(" - ");
+		printRepresentationOfNode.append("a-value " + getActionValue());
+		if (takenAction != null){
+			printRepresentationOfNode.append("; ");
+			printRepresentationOfNode.append("n.sel-value " + getNodeSelectionValue());
+		}
+		if (takenAction != null){
+			printRepresentationOfNode.append("; ");
+			printRepresentationOfNode.append("PriPro " + getPriorProbability());
+		}
+		printRepresentationOfNode.append("; ");
+		printRepresentationOfNode.append("eval-value " + getEvaluationValue());
+		printRepresentationOfNode.append("; ");
+		printRepresentationOfNode.append("visits " + getVisitCount());
+		
+		LOGGER.log(printRepresentationOfNode.toString());
 		for (MCSTNode mcstNode : childNodes) {
 			mcstNode.printTree(treeDepth);
 		}

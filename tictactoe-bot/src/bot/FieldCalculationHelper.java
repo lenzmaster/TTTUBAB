@@ -30,30 +30,35 @@ public class FieldCalculationHelper {
 		return GlobalDefinitions.PLAYER_NEUTRAL_ID;
 	}
 	
+
 	/**
-	 * Calculates the winner in a given 3x3 board and returns the lower or upper bound.
-	 * If no winner can be found the value of <code>notOccupiedValue</code> is returned.
-	 * @param transformedBoard
-	 * @param lowerBound
+	 * Calculates the winner in a given 3x3 board and returns the palyer that won the board.
+	 * If no one has won the board yet Player None will we returned.
+	 * @param transformedBoardSelf
+	 * @param transformedBoardOpponent
 	 * @param upperBound
-	 * @param notOccupiedValue
 	 * @return
 	 */
-	public static float getWinner(float[][] transformedBoard, float lowerBound, float upperBound,
-			float notOccupiedValue){
+	public static Player getWinner(float[][] transformedBoardSelf, float[][] transformedBoardOpponent, float upperBound){
 		WinningOptions[] winningOptions = WinningOptions.values();
 		for (WinningOptions winningOption : winningOptions) {
 			Point tile1 = winningOption.getTile1();
 			Point tile2 = winningOption.getTile2();
 			Point tile3 = winningOption.getTile3();
-			if( (transformedBoard[tile1.getX()][tile1.getY()] == upperBound ||
-				transformedBoard[tile1.getX()][tile1.getY()] == lowerBound)	&&
-				transformedBoard[tile1.getX()][tile1.getY()] == transformedBoard[tile2.getX()][tile2.getY()] &&
-				transformedBoard[tile2.getX()][tile2.getY()] == transformedBoard[tile3.getX()][tile3.getY()]){
-				return transformedBoard[tile1.getX()][tile1.getY()];
+			//Check, if self won
+			if( transformedBoardSelf[tile1.getX()][tile1.getY()] == upperBound	&&
+				transformedBoardSelf[tile1.getX()][tile1.getY()] == transformedBoardSelf[tile2.getX()][tile2.getY()] &&
+				transformedBoardSelf[tile2.getX()][tile2.getY()] == transformedBoardSelf[tile3.getX()][tile3.getY()]){
+				return Player.getPlayer(PlayerTypes.Self);
 			}
+			//Check, if opponent won
+			if( transformedBoardOpponent[tile1.getX()][tile1.getY()] == upperBound	&&
+				transformedBoardOpponent[tile1.getX()][tile1.getY()] == transformedBoardOpponent[tile2.getX()][tile2.getY()] &&
+						transformedBoardOpponent[tile2.getX()][tile2.getY()] == transformedBoardOpponent[tile3.getX()][tile3.getY()]){
+					return Player.getPlayer(PlayerTypes.Opponent);
+				}
 		}
-		return notOccupiedValue;
+		return Player.getPlayer(PlayerTypes.None);
 		
 	}
 	

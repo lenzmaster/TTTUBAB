@@ -10,6 +10,6 @@ public interface ITimeCalculator {
 	 * @param timeInBank the time left in the bank in ns
 	 * @return
 	 */
-	public long calculatTimeForTurn(MCSTNode root, long timeInBank);
+	public long calculateTimeForTurn(MCSTNode root, long timeInBank);
 	
 }

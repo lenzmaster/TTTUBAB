@@ -61,7 +61,6 @@ public class BotStarter {
 		return _fieldForDoubleChecking;
 	}
 	
-	
 	/**
 	 * Always use this getter and never the variable, because of lazy loading.
 	 * @return
@@ -80,10 +79,10 @@ public class BotStarter {
      *
      * @return The column where the turn was made.
      */
-	public Move makeTurn(int totalTimeLeft) {
+	public Move makeTurn(long totalTimeLeft) {
 		//During initialization set root to a field containing all information received
 		if(initalization){
-			//This is dirty, since the gamestate of the root is the previous gamestate, since no action was taken
+			//This is dirty, since the game state of the root is the previous game state, since no action was taken
 			this.getTree().setPreviousGameState(getFieldForDoubleChecking());//Set initialization to false the first time a move needs made
 			this.initalization = false;
 		} else {
@@ -108,7 +107,8 @@ public class BotStarter {
 			}
 		}
 		LOGGER.log("Total time left (in ms): " + totalTimeLeft);
-		long turnTimeInNS = 1000000 * GlobalDefinitions.TIME_USED_PER_TURN;
+		long totalTimeLeftInNs = totalTimeLeft * GlobalDefinitions.TIME_MS_TO_NS_FACTOR;
+		long turnTimeInNS = GlobalDefinitions.getTimeCalculator().calculateTimeForTurn(getTree().getRoot(), totalTimeLeftInNs);
 		IAction actionToTake = getTree().calculateBestAction(turnTimeInNS);
 		tree.setNewRoot(actionToTake);
 		return ((Move) actionToTake);
@@ -137,7 +137,8 @@ public class BotStarter {
 			//Get performed move
 			lastPerformedMoveByOpponent = ((Field) tree.getRoot().getGameState()).getPerformedMove(newBoard);
 			//Set new root of tree
-			getTree().setNewRoot(lastPerformedMoveByOpponent);
+			//TODO: use the return value
+			boolean newRootFound = getTree().setNewRoot(lastPerformedMoveByOpponent);
 			
 		}
 	}

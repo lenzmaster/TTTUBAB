@@ -102,7 +102,7 @@ public class Field implements IGameState, IReusable{
 			int startY = microboardY * 3;
 			for (int i = 0; i < copyOfBoard.length; i++){
 				for (int j = 0; j < copyOfBoard[i].length; j++){
-					copyOfBoard[i][j] = this.mBoard[startX * 3 + i][startY * 3 + j];
+					copyOfBoard[i][j] = this.mBoard[startX + i][startY + j];
 				}
 			}
 			return copyOfBoard;

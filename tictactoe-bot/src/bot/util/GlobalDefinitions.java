@@ -13,6 +13,8 @@ import bot.nodeevaluation.MacroStrategyEvaluationFunction;
 import bot.nodeevaluation.NodeEvaluationCalculatorFactory;
 import bot.nodeselectioncalculation.FirstNodeSelectionValueCalculator;
 import bot.nodeselectioncalculation.INodeSelectionValueCalculator;
+import bot.time.FieldDensityTimeCalculator;
+import bot.time.ITimeCalculator;
 
 
 public class GlobalDefinitions {
@@ -21,7 +23,8 @@ public class GlobalDefinitions {
 	private static INodeSelectionValueCalculator _nodeSelectionValueCalculator = null;
 	private static IActionValueCalculator _actionValueCalculator = null;
 	private static INodeEvaluationValueCalculator _nodeEvaluationCalculator = null;
-	public static final int TIME_USED_PER_TURN = 450;
+	private static ITimeCalculator _timeCalculator = null;
+	public static final int TIME_USED_PER_TURN_MIN = 450;
 	public static final int TIME_BUFFER_FOR_FINISHING_DECISION_PROCESS = 50;
 	public static final int PLAYER_NEUTRAL_ID = 0;
 	public static final int MACRO_FIELD_NEEDS_TO_BE_USED_ID = -1;
@@ -58,6 +61,12 @@ public class GlobalDefinitions {
 	public static final int MANAGED_MCSTTREES_INITAL_CAPACITY = 90;
 	public static final boolean USE_PRECREATED_OBJECTS = false;
 	
+	//Time management constants
+	public static final int TIME_SAFETY_STOCK = 1000; //in ms
+	
+	
+	//Miscellaneous
+	public static final int TIME_MS_TO_NS_FACTOR = 1000000;
 	
 	public static IPriorProbabilityCalculator getPriorProbabilityCalculator(){
 		if (_probabilityCalculator == null){
@@ -88,6 +97,12 @@ public class GlobalDefinitions {
 		return _nodeEvaluationCalculator;
 	}
 	
-	
+	public static ITimeCalculator getTimeCalculator(){
+		if (_timeCalculator == null){
+			_timeCalculator = new FieldDensityTimeCalculator();
+		}
+		return _timeCalculator;
+	}
+
 	
 }

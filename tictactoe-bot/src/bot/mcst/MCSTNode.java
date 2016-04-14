@@ -314,6 +314,8 @@ public class MCSTNode implements IReusable{
 		}
 		LOGGER.log("Action taken with value: " + currentlyMostVisitedNode.getActionValue());
 		LOGGER.log("Action taken with visit amount of: " + currentlyMostVisitedNode.getVisitCount());
+		LOGGER.log("Action Prioprobability value: " + currentlyMostVisitedNode.getPriorProbability());
+		LOGGER.log("Resulting state evaluation value: " + currentlyMostVisitedNode.getEvaluationValue());
 		return currentlyMostVisitedNode.getTakenAction();
 	}
 	

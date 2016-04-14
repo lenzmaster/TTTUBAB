@@ -360,7 +360,11 @@ public class Field implements IGameState, IReusable{
 				String line = "";
 				for (int x = 0; x < COLS; x++) {
 					if (x > 0) {
-						line += "|";
+						if (x % 3 == 0){
+							line += "||";
+						} else {
+							line += "|";
+						}
 					}
 					line += mBoard[x][y];
 				}

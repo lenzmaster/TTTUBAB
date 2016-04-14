@@ -3,9 +3,10 @@ package bot.mcst;
 import java.util.List;
 
 import bot.memory.IReusable;
+import bot.threading.Lock;
 import bot.util.Logger;
 
-public class MCSTTree implements IReusable{
+public class MCSTTree extends Lock implements IReusable{
 
 	private MCSTNode root = null;
 	
@@ -13,27 +14,51 @@ public class MCSTTree implements IReusable{
 	
 	private IGameState previousGameState = null;
 	
+	private long maxVisitTime = 0;
+	
+	private long iterationCount = 0;
+	
 	public static Logger LOGGER = new Logger("MCSTTree");
 	
 	public MCSTNode getRoot(){
+		this.checkLock();
 		return root;
 	}
 	
-	public void setRoot(MCSTNode newRoot){
+	public synchronized void setRoot(MCSTNode newRoot){
+		this.checkLock();
 		this.oldRoot = this.root;
 		this.root = newRoot;
 	}
 	
 	public MCSTNode getOldRoot(){
+		this.checkLock();
 		return this.oldRoot;
 	}
 	
 	public IGameState getPreviousGameState(){
+		this.checkLock();
 		return previousGameState;
 	}
 	
 	public void setPreviousGameState(IGameState previousGameState){
+		this.checkLock();
 		this.previousGameState = previousGameState;
+	}
+	
+	public long getMaxVisitTime(){
+		this.checkLock();
+		return maxVisitTime;
+	}
+	
+	public long getIterationCount(){
+		this.checkLock();
+		return iterationCount;
+	}
+	
+	public void resetIterationCount(){
+		this.checkLock();
+		iterationCount = 0;
 	}
 	
 	public MCSTTree() {
@@ -52,31 +77,24 @@ public class MCSTTree implements IReusable{
 	
 	public void reset(){
 		root = null;
+		maxVisitTime = 0;
+		iterationCount = 0;
 	}
 	
-	/**
-	 * Calculates the best action by using the monte carlo approach for the given duration.
-	 * @param duration duration in nano seconds
-	 * @return the calculated action
-	 */
-	public IAction calculateBestAction(long duration){
-		long timeElapsed = 0;
-		long longestIterationDuration = 0;
-		long iterationCount = 0;
-		while (duration - (timeElapsed + longestIterationDuration) > 0){
-			long iterationStartTime = System.nanoTime();
-			root.visitNode(previousGameState);
-			long iterationDuration = System.nanoTime() - iterationStartTime;
-			if (iterationDuration > longestIterationDuration){
-				longestIterationDuration = iterationDuration;
-			}
-			timeElapsed += iterationDuration;
-			iterationCount++;
+	public IAction getMostVisitedAction(){
+		this.checkLock();
+		return getRoot().getActionWithMostVisits();
+	}
+	
+	public void performIteration(){
+		this.checkLock();
+		long startTime = System.nanoTime();
+		getRoot().visitNode(getPreviousGameState());
+		long elapsedTime = System.nanoTime() - startTime;
+		if (elapsedTime > maxVisitTime){
+			maxVisitTime = elapsedTime;
 		}
-		LOGGER.log("Iteration count: " + iterationCount);
-		LOGGER.log("Total time elapsed: " + timeElapsed + " --> " + timeElapsed / 1000000 + "ms");
-		LOGGER.log("Longest iteration duration: " + longestIterationDuration + " --> " + longestIterationDuration / 1000000 + "ms");
-		return root.getActionWithMostVisits();
+		iterationCount++;
 	}
 	
 	/**
@@ -85,6 +103,7 @@ public class MCSTTree implements IReusable{
 	 * @return true, if a child with the taken action was found; otherwise false
 	 */
 	public boolean setNewRoot(IAction performedAction){
+		this.checkLock();
 		List<MCSTNode> childNodes = root.getChildNodes();
 		for (MCSTNode childNode : childNodes) {
 			if (childNode.getTakenAction().equals(performedAction)){
@@ -107,6 +126,7 @@ public class MCSTTree implements IReusable{
 	 * @param treeDepth
 	 */
 	public void print(int treeDepth){
+		this.checkLock();
 		System.out.println("Tree: ");
 		root.printTree(treeDepth);
 	}

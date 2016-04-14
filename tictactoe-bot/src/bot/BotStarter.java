@@ -24,6 +24,9 @@ import bot.mcst.IAction;
 import bot.mcst.MCSTNode;
 import bot.mcst.MCSTTree;
 import bot.memory.ObjectManager;
+import bot.threading.CounterForTestThread;
+import bot.threading.TestThread;
+import bot.threading.TreeVisitorThread;
 import bot.util.GlobalDefinitions;
 import bot.util.Logger;
 
@@ -47,6 +50,8 @@ public class BotStarter {
 	private boolean initalization = true;
 	
 	private Move lastPerformedMoveByOpponent = null;
+	
+	private long timeEndLastTurn = 0;
 	
 	/**
 	 * Always use this getter and never the variable, because of lazy loading.
@@ -80,17 +85,40 @@ public class BotStarter {
      * @return The column where the turn was made.
      */
 	public Move makeTurn(long totalTimeLeft) {
+		long startTime = System.nanoTime();
 		//During initialization set root to a field containing all information received
 		if(initalization){
 			//This is dirty, since the game state of the root is the previous game state, since no action was taken
+			this.getTree();
+			
+			//Lock tree
+			try {
+				getTree().lock();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			this.getTree().setPreviousGameState(getFieldForDoubleChecking());//Set initialization to false the first time a move needs made
 			this.initalization = false;
+			//Start visitor thread
+			TreeVisitorThread visitorThread = new TreeVisitorThread(this.tree);
+			visitorThread.start();
 		} else {
+			//Lock tree
+			try {
+				getTree().lock();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			LOGGER.log("Time elapsed since last turn: " + (startTime - timeEndLastTurn));
 			//Log move made by opponent and the current move made by the current root
 			LOGGER.log("Last move of opponent: (" + lastPerformedMoveByOpponent.getX() +  "/" + lastPerformedMoveByOpponent.getY() + ")");
 			//Log current tree depth
 			LOGGER.log("Current Tree depth: " + getTree().getTreeDepth());
-			//Check if gamestates are equal
+			LOGGER.log("Iterations since last turn: " + getTree().getIterationCount());
+			getTree().resetIterationCount();
+			//Check if game states are equal
 			Field currentRootField = (Field) getTree().getRoot().getGameState();
 			if (!currentRootField.equals(getFieldForDoubleChecking())){
 				LOGGER.log("Root field is unequal the field created based on the received game data of the gamestate.");
@@ -101,16 +129,45 @@ public class BotStarter {
 				//Don´t reuse old tree
 				MCSTNode newRoot = ObjectManager.getNewMCSTNode();
 				getTree().setRoot(newRoot);
-				getTree().setPreviousGameState(getFieldForDoubleChecking());
+				getTree().setPreviousGameState(getFieldForDoubleChecking().clone());
 			} else {
 				LOGGER.log("Root field is equal to current gamestate:)");
 			}
 		}
+		
+		
 		LOGGER.log("Total time left (in ms): " + totalTimeLeft);
 		long totalTimeLeftInNs = totalTimeLeft * GlobalDefinitions.TIME_MS_TO_NS_FACTOR;
 		long turnTimeInNS = GlobalDefinitions.getTimeCalculator().calculateTimeForTurn(getTree().getRoot(), totalTimeLeftInNs);
-		IAction actionToTake = getTree().calculateBestAction(turnTimeInNS);
-		tree.setNewRoot(actionToTake);
+		long turnTimeleft = (turnTimeInNS - (System.nanoTime() - startTime)) / GlobalDefinitions.TIME_MS_TO_NS_FACTOR;
+		try {
+			if (turnTimeleft < 0){
+				//Don´t unlock and just get the next action
+				LOGGER.log("Thread didn´t sleep, since turn time left was (in ms): " + turnTimeleft);
+			} else {
+				//Unlock and sleep
+				getTree().unlock();
+				LOGGER.log("Thread sleept (in ms): " + turnTimeleft);
+				Thread.sleep(turnTimeleft);
+				//Lock to get action
+				getTree().lock();
+			}
+			
+			
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		
+		IAction actionToTake = getTree().getMostVisitedAction();
+		LOGGER.log("Iterations this turn: " + getTree().getIterationCount());
+		getTree().setNewRoot(actionToTake);
+		getTree().resetIterationCount();
+		//Unlock and finish move
+		getTree().unlock();
+		
+		timeEndLastTurn = System.nanoTime();
 		return ((Move) actionToTake);
 	}
 	
@@ -134,11 +191,20 @@ public class BotStarter {
 					counter++;
 				}
 			}
+			//Lock
+			try {
+				getTree().lock();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			//Get performed move
 			lastPerformedMoveByOpponent = ((Field) tree.getRoot().getGameState()).getPerformedMove(newBoard);
 			//Set new root of tree
 			//TODO: use the return value
 			boolean newRootFound = getTree().setNewRoot(lastPerformedMoveByOpponent);
+			//Unlock
+			getTree().unlock();
 			
 		}
 	}

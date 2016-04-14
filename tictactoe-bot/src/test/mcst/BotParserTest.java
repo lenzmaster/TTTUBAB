@@ -94,9 +94,10 @@ public class BotParserTest {
 		0|0|0|0|0|0|0|0|0
 		0|0|0|0|0|0|0|0|0
 		0|0|0|0|0|0|0|0|0
+	 * @throws InterruptedException 
 	 */
 	@Test
-	public void testFirstMove() {
+	public void testFirstMove() throws InterruptedException {
 		sendGameSettings();
 
 		List<String> commands = new ArrayList<String>();
@@ -116,7 +117,9 @@ public class BotParserTest {
 		}
 		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
 		System.out.println("Old tree: ");
+		testInstanceBot.getTree().lock();
 		testInstanceBot.getTree().getOldRoot().printTree(1);
+		testInstanceBot.getTree().unlock();
 		
 		
 	}
@@ -135,9 +138,10 @@ public class BotParserTest {
 		0|0|0|0|0|0|0|0|0
 		
 	 * field to play in: (1/2)
+	 * @throws InterruptedException 
 	 */
 	@Test
-	public void testFinishMove() {
+	public void testFinishMove() throws InterruptedException {
 		sendGameSettings();
 
 		List<String> commands = new ArrayList<String>();
@@ -155,7 +159,9 @@ public class BotParserTest {
 				System.out.println(result);
 			}
 		}
+		testInstanceBot.getTree().lock();
 		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
+		testInstanceBot.getTree().unlock();
 		
 	}
 	
@@ -172,9 +178,10 @@ public class BotParserTest {
 		0|0|0|1|0|0|0|2|1
 		
 	 * field to play in: (1/2)
+	 * @throws InterruptedException 
 	 */
 	@Test
-	public void testFinishSituation1() {
+	public void testFinishSituation1() throws InterruptedException {
 		sendGameSettings();
 
 		List<String> commands = new ArrayList<String>();
@@ -192,9 +199,11 @@ public class BotParserTest {
 				System.out.println(result);
 			}
 		}
+		testInstanceBot.getTree().lock();
 		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
 		System.out.println("Old tree: ");
 		testInstanceBot.getTree().getOldRoot().printTree(-1);
+		testInstanceBot.getTree().unlock();
 	}
 	
 	/**
@@ -210,9 +219,10 @@ public class BotParserTest {
 		0|0|0|1|0|0|1|0|0
 		
 	 * field to play in: (2/2)
+	 * @throws InterruptedException 
 	 */
 	@Test
-	public void testFinishSituation2() {
+	public void testFinishSituation2() throws InterruptedException {
 		sendGameSettings();
 
 		List<String> commands = new ArrayList<String>();
@@ -230,9 +240,11 @@ public class BotParserTest {
 				System.out.println(result);
 			}
 		}
+		testInstanceBot.getTree().lock();
 		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
 		System.out.println("Old tree: ");
 		testInstanceBot.getTree().getOldRoot().printTree(-1);
+		testInstanceBot.getTree().unlock();
 	}
 	
 	/**
@@ -248,9 +260,10 @@ public class BotParserTest {
 		0|2|1|0|1|0|0|0|2
 		
 	 * fields to play in: (1/0), (2/2)
+	 * @throws InterruptedException 
 	 */
 	@Test
-	public void testTieSituation() {
+	public void testTieSituation() throws InterruptedException {
 		sendGameSettings();
 
 		List<String> commands = new ArrayList<String>();
@@ -268,8 +281,10 @@ public class BotParserTest {
 				System.out.println(result);
 			}
 		}
+		testInstanceBot.getTree().lock();
 		((Field) testInstanceBot.getTree().getRoot().getGameState()).printBoard();
 		System.out.println("Old tree: ");
 		testInstanceBot.getTree().getOldRoot().printTree(-1);
+		testInstanceBot.getTree().unlock();
 	}
 }

@@ -1,0 +1,19 @@
+Information regarding the coding of the game data, when received from the server
+
+(Number: Meaning)
+
+0: Tile not occupied
+1: Tile occupied by player 1
+2: Tile occupied by player 2
+
+4: Tile is allowed to be played in by player 1
+8: Tile is allowed to be played in by player 2
+
+16: Tile is not occupied, but micro board won by player 1
+17: Tile is occupied by player 1 and micro board won by player 1
+18: Tile is occupied by player 2, but micro board won by player 1
+
+32: Tile is not occupied, but micro board won by player 2
+33: Tile is occupied by player 1, but micro board won by player 2
+34: Tile is occupied by player 2 and micro board won by player 2
+
